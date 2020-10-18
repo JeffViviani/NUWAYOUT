@@ -1,0 +1,2 @@
+FULLSCREEN = True;
+MUSIC = True;
