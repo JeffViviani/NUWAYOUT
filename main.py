@@ -1,3 +1,4 @@
+#
 #AUTHOR: JEFFREY VIVIANI
 #DATE CREATED: 12/15/2019
 #LAST MODIFIED: 12/18/2019
@@ -28,7 +29,7 @@ screen_height = displayInfo.current_h
 scl.set_scalers(screen_width, screen_height)
 
 #Initialize the full screen display
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 8)
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 32)
 
 #Initialize the robot surfaces
 Robot.init_scaled_surfaces()
@@ -50,7 +51,8 @@ press_button_rect = press_button.get_rect()
 press_button_rect.left = 187 * scl.scale_x; press_button_rect.top = 200 * scl.scale_y;
 
 #Initialize the title surface
-title = scl.scale(pygame.image.load("Images/HUD/title.jpeg")).convert()
+title = scl.scale(pygame.image.load("Images/HUD/title.png")).convert_alpha()
+title.set_colorkey((255,255,255))
 title_rect = title.get_rect()
 title_rect.left = 58 * scl.scale_x
 title_rect.top = 100 * scl.scale_y
@@ -61,6 +63,7 @@ text_rect = pygame.Rect(0,0,20 * scl.scale_x,20 * scl.scale_y)
 
 #Blit the initialized surfaces to the screen
 screen.blit(background,background_rect)
+screen.blit(title, title_rect)
 screen.blit(press_button,press_button_rect)
 state = 0
 flash = 0
@@ -117,6 +120,7 @@ if my_joystick.get_init():
 				i += 1
 				Laser.registry.pop(0)
 			screen.blit(background,background_rect)
+			screen.blit(title, title_rect)
 			pygame.mixer.music.stop() 
 			pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
 			pygame.mixer.music.play()
@@ -125,7 +129,6 @@ if my_joystick.get_init():
 			if flash > 29:
 				flash = 0
 				showing_space = not showing_space
-			screen.blit(title, title_rect)
 			if showing_space:
 				screen.blit(press_button,press_button_rect)
 			else:
@@ -138,7 +141,7 @@ if my_joystick.get_init():
 					screen.blit(background,countdown_rect,countdown_rect)
 					clear_last_number = False
 				if i > 0:
-					countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png")).convert()
+					countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png")).convert_alpha()
 					countdown_rect = countdown.get_rect()
 					countdown_rect.left = 185 * scl.scale_x
 					countdown_rect.top = 55 * scl.scale_y
