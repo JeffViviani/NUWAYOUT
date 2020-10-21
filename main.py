@@ -27,6 +27,9 @@ screen_height = displayInfo.current_h
 #Initialize the scaler
 scl.set_scalers(screen_width, screen_height)
 
+#Initialize the full screen display
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 8)
+
 #Initialize the robot surfaces
 Robot.init_scaled_surfaces()
 Robot.init_sounds()
@@ -36,21 +39,18 @@ Laser.init_scaled_surfaces()
 
 #Initialize the door surfaces
 Door.init_scaled_surfaces()
-
-#Initialize the full screen display
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 8)
 	
 #Initialize the background
-background = scl.scale(pygame.image.load("Images/Background/background.png"))
+background = scl.scale(pygame.image.load("Images/Background/background.png")).convert()
 background_rect = background.get_rect()
 
 #Initialize the "Press Button" surface
-press_button = scl.scale(pygame.image.load("Images/HUD/pressButton.png"))
+press_button = scl.scale(pygame.image.load("Images/HUD/pressButton.png")).convert()
 press_button_rect = press_button.get_rect()
 press_button_rect.left = 187 * scl.scale_x; press_button_rect.top = 200 * scl.scale_y;
 
 #Initialize the title surface
-title = scl.scale(pygame.image.load("Images/HUD/title.jpeg"))
+title = scl.scale(pygame.image.load("Images/HUD/title.jpeg")).convert()
 title_rect = title.get_rect()
 title_rect.left = 58 * scl.scale_x
 title_rect.top = 100 * scl.scale_y
@@ -75,7 +75,7 @@ door_times = 10
 if config.MUSIC:
 	#Play music
 	pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
-	pygame.mixer.music.play(-1)
+	pygame.mixer.music.play()
 if pygame.joystick.get_count() == 1:
 	my_joystick = pygame.joystick.Joystick(0)
 	my_joystick.init()
@@ -98,6 +98,9 @@ if my_joystick.get_init():
 					flash = 0
 					i = 4
 					next_number = True;
+					pygame.mixer.music.stop() 
+					pygame.mixer.music.load("Audio/Crispyness.mp3")
+					pygame.mixer.music.play()
 				elif state == 2:
 					fire = True
 		clock.tick(75) #60FPS
@@ -108,12 +111,15 @@ if my_joystick.get_init():
 			x = len(Robot.registry); i = 0;
 			while i < x:
 				i += 1
-				Robot.Registry.pop(0)
+				Robot.registry.pop(0)
 			x = len(Laser.registry); i = 0;
 			while i < x:
 				i += 1
 				Laser.registry.pop(0)
 			screen.blit(background,background_rect)
+			pygame.mixer.music.stop() 
+			pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
+			pygame.mixer.music.play()
 		if state == 0:
 			flash = flash + 1
 			if flash > 29:
@@ -132,7 +138,7 @@ if my_joystick.get_init():
 					screen.blit(background,countdown_rect,countdown_rect)
 					clear_last_number = False
 				if i > 0:
-					countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png"))
+					countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png")).convert()
 					countdown_rect = countdown.get_rect()
 					countdown_rect.left = 185 * scl.scale_x
 					countdown_rect.top = 55 * scl.scale_y

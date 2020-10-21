@@ -88,29 +88,29 @@ class Robot:
 			self.draw()
 	@classmethod
 	def init_scaled_surfaces(cls):
-		cls.image_surfaces[0] = scl.scale(pygame.image.load("Images/Robots/blue_right.png"))
+		cls.image_surfaces[0] = scl.scale(pygame.image.load("Images/Robots/blue_right.png")).convert()
 		cls.image_widths[0] = 16
-		cls.image_surfaces[1] = scl.scale(pygame.image.load("Images/Robots/blue_front.png"))
+		cls.image_surfaces[1] = scl.scale(pygame.image.load("Images/Robots/blue_front.png")).convert()
 		cls.image_widths[1] = 16
-		cls.image_surfaces[2] = scl.scale(pygame.image.load("Images/Robots/blue_left.png"))
+		cls.image_surfaces[2] = scl.scale(pygame.image.load("Images/Robots/blue_left.png")).convert()
 		cls.image_widths[2] = 18
-		cls.image_surfaces[3] = scl.scale(pygame.image.load("Images/Robots/blue_back.png"))
+		cls.image_surfaces[3] = scl.scale(pygame.image.load("Images/Robots/blue_back.png")).convert()
 		cls.image_widths[3] = 18
-		cls.image_surfaces[4] = scl.scale(pygame.image.load("Images/Robots/orange_right.png"))
+		cls.image_surfaces[4] = scl.scale(pygame.image.load("Images/Robots/orange_right.png")).convert()
 		cls.image_widths[4] = 16
-		cls.image_surfaces[5] = scl.scale(pygame.image.load("Images/Robots/orange_front.png"))
+		cls.image_surfaces[5] = scl.scale(pygame.image.load("Images/Robots/orange_front.png")).convert()
 		cls.image_widths[5] = 16
-		cls.image_surfaces[6] = scl.scale(pygame.image.load("Images/Robots/orange_left.png"))
+		cls.image_surfaces[6] = scl.scale(pygame.image.load("Images/Robots/orange_left.png")).convert()
 		cls.image_widths[6] = 18
-		cls.image_surfaces[7] = scl.scale(pygame.image.load("Images/Robots/orange_back.png"))
+		cls.image_surfaces[7] = scl.scale(pygame.image.load("Images/Robots/orange_back.png")).convert()
 		cls.image_widths[7] = 18
-		cls.image_surfaces[8] = scl.scale(pygame.image.load("Images/Robots/red_right.png"))
+		cls.image_surfaces[8] = scl.scale(pygame.image.load("Images/Robots/red_right.png")).convert()
 		cls.image_widths[8] = 16
-		cls.image_surfaces[9] = scl.scale(pygame.image.load("Images/Robots/red_front.png"))
+		cls.image_surfaces[9] = scl.scale(pygame.image.load("Images/Robots/red_front.png")).convert()
 		cls.image_widths[9] = 16
-		cls.image_surfaces[10] = scl.scale(pygame.image.load("Images/Robots/red_left.png"))
+		cls.image_surfaces[10] = scl.scale(pygame.image.load("Images/Robots/red_left.png")).convert()
 		cls.image_widths[10] = 18
-		cls.image_surfaces[11] = scl.scale(pygame.image.load("Images/Robots/red_back.png"))
+		cls.image_surfaces[11] = scl.scale(pygame.image.load("Images/Robots/red_back.png")).convert()
 		cls.image_widths[11] = 18
 	@classmethod
 	def init_sounds(cls):
@@ -255,8 +255,8 @@ class Laser:
 	
 	@classmethod
 	def init_scaled_surfaces(cls):
-		cls.image_vertical = scl.scale(pygame.image.load("Images/Projectiles/laser_vertical.png"))
-		cls.image_horizontal = scl.scale(pygame.image.load("Images/Projectiles/laser_horizontal.png"))
+		cls.image_vertical = scl.scale(pygame.image.load("Images/Projectiles/laser_vertical.png")).convert()
+		cls.image_horizontal = scl.scale(pygame.image.load("Images/Projectiles/laser_horizontal.png")).convert()
 	def __init__(self,screen,background,grid_x,grid_y,dir,sound):
 		Laser.registry.append(self)
 		self.grid_x = grid_x

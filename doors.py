@@ -35,12 +35,12 @@ class Door:
 		
 	@classmethod
 	def init_scaled_surfaces(cls):
-		cls.image_surfaces[0] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s0.png"))
-		cls.image_surfaces[1] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s1.png"))
-		cls.image_surfaces[2] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s2.png"))
-		cls.image_surfaces[3] = scl.scale(pygame.image.load("Images/Doors/Vertical/s0.png"))
-		cls.image_surfaces[4] = scl.scale(pygame.image.load("Images/Doors/Vertical/s1.png"))
-		cls.image_surfaces[5] = scl.scale(pygame.image.load("Images/Doors/Vertical/s2.png"))
+		cls.image_surfaces[0] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s0.png")).convert()
+		cls.image_surfaces[1] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s1.png")).convert()
+		cls.image_surfaces[2] = scl.scale(pygame.image.load("Images/Doors/Horizontal/s2.png")).convert()
+		cls.image_surfaces[3] = scl.scale(pygame.image.load("Images/Doors/Vertical/s0.png")).convert()
+		cls.image_surfaces[4] = scl.scale(pygame.image.load("Images/Doors/Vertical/s1.png")).convert()
+		cls.image_surfaces[5] = scl.scale(pygame.image.load("Images/Doors/Vertical/s2.png")).convert()
 	def update_image(self):
 		_surface_index = self.orientation * 3 + self.state
 		self.image = Door.image_surfaces[_surface_index]
