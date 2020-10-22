@@ -11,6 +11,7 @@ import sys, pygame, config
 from robots import *
 from scaler import *
 from doors import *
+from number_engine import *
 
 #Initialize pygame
 pygame.mixer.init()
@@ -44,6 +45,10 @@ Door.init_scaled_surfaces()
 #Initialize the background
 background = scl.scale(pygame.image.load("Images/Background/background.png")).convert()
 background_rect = background.get_rect()
+
+#Initialize the NumberEngine class and create instance
+NumberEngine.init_class(screen, background)
+number_engine = NumberEngine()
 
 #Initialize the "Press Button" surface
 press_button = scl.scale(pygame.image.load("Images/HUD/pressButton.png")).convert()
@@ -206,12 +211,7 @@ if my_joystick.get_init():
 			#Manage the timer
 			if time_decisec_from_start != timer:
 				timer = time_decisec_from_start
-				screen.blit(background,text_rect,text_rect)
-				textsurface = scl.scale(myfont.render(str(timer/10), False, (0, 0, 0)))
-				text_rect = textsurface.get_rect()
-				text_rect.left = screen_width - (28 * scl.scale_x) - text_rect.width
-				text_rect.top = 3 * scl.scale_y
-				screen.blit(textsurface,text_rect)
+				number_engine.print_right_justify(timer / 10, 300, 20)
 		#Refresh the display
 		pygame.display.flip()
 	sys.exit()
