@@ -12,7 +12,7 @@ class DoorManager:
 		for d in self.doors:
 			d.open_close_motion()
 	def refresh_doors(self):
-		for d in Doors:
+		for d in self.doors:
 			d.refresh()
 class Door:
 	image_surfaces = [None]*6
@@ -41,6 +41,13 @@ class Door:
 		cls.image_surfaces[3] = scl.scale(pygame.image.load("Images/Doors/Vertical/s0.png")).convert_alpha()
 		cls.image_surfaces[4] = scl.scale(pygame.image.load("Images/Doors/Vertical/s1.png")).convert_alpha()
 		cls.image_surfaces[5] = scl.scale(pygame.image.load("Images/Doors/Vertical/s2.png")).convert_alpha()
+		
+		#cls.image_surfaces[0].set_colorkey((255,255,255), pygame.RLEACCEL)
+		#cls.image_surfaces[1].set_colorkey((255,255,255), pygame.RLEACCEL)
+		#cls.image_surfaces[2].set_colorkey((255,255,255), pygame.RLEACCEL)
+		#cls.image_surfaces[3].set_colorkey((255,255,255), pygame.RLEACCEL)
+		#cls.image_surfaces[4].set_colorkey((255,255,255), pygame.RLEACCEL)
+		#cls.image_surfaces[5].set_colorkey((255,255,255), pygame.RLEACCEL)
 
 	def update_image(self):
 		_surface_index = self.orientation * 3 + self.state
@@ -62,11 +69,9 @@ class Door:
 		if self.open_close != None:
 			if self.open_close == "Open":
 				self.state += 1
-				self.refresh()
 				if self.state == 2:
 					self.open_close = "Close"
 			else:
 				self.state -= 1
-				self.refresh()
 				if self.state == 0:
 					self.open_close = None

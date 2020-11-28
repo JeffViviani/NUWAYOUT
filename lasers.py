@@ -5,11 +5,19 @@ class Laser:
 	registry = []
 	image_vertical = None
 	image_horizontal = None
+	edge_left = None
+	edge_right = None
+	edge_top = None
+	edge_bottom = None
 	
 	@classmethod
 	def init_scaled_surfaces(cls):
 		cls.image_vertical = scl.scale(pygame.image.load("Images/Projectiles/laser_vertical.png"))
 		cls.image_horizontal = scl.scale(pygame.image.load("Images/Projectiles/laser_horizontal.png"))
+		cls.edge_left = 33 * scl.scale_x
+		cls.edge_right = 542 * scl.scale_x
+		cls.edge_top = 25 * scl.scale_y
+		cls.edge_bottom = 411 * scl.scale_y
 	def __init__(self,screen,background,grid_x,grid_y,dir,sound):
 		Laser.registry.append(self)
 		self.grid_x = grid_x
@@ -37,19 +45,19 @@ class Laser:
 		self.vanish_from(self.background)
 		if self.dir == 0:
 			self.rect.left += 6
-			if self.rect.left >= self.screen.get_width() - 28 - self.width:
+			if self.rect.left >= Laser.edge_right:
 				self.delete()
 		elif self.dir == 1:
 			self.rect.top += 6
-			if self.rect.top >= self.screen.get_height() - 25 - self.height:
+			if self.rect.top >= Laser.edge_top:
 				self.delete()
 		elif self.dir == 2:
 			self.rect.left -= 6
-			if self.rect.left <= 27 + self.width:
+			if self.rect.left <= Laser.edge_left:
 				self.delete()
 		elif self.dir == 3:
 			self.rect.top -= 6
-			if self.rect.top <= 25 + self.height:
+			if self.rect.top <= Laser.edge_bottom:
 				self.delete()
 		if self.alive and not self.check_contact():
 			self.draw()

@@ -4,7 +4,7 @@
 # DESCRIPTION: Class for handling the robots.
 #
 
-#LOad required modules
+#Load required modules
 import pygame
 from random import random
 from scaler import *

@@ -10,15 +10,13 @@ class NumberEngine:
 	screen = None;
 	background_surface = None
 	erase_rect = None
-	fixed_char_width = None
-	fixed_char_height = None
+	fixed_char_spacing = None
 	surface_width = None
 	symbols_surfaces = {}
 	symbols_rects = {}
 	@classmethod
 	def init_class(cls, screen, background_surface):
-		cls.fixed_char_width = 9 * scl.scale_x
-		cls.fixed_char_height = 9 * scl.scale_y
+		cls.fixed_char_spacing = 20 * scl.scale_x
 		cls.screen = screen
 		cls.background_surface = background_surface
 		cls.symbols_surfaces['0'] = scl.scale(pygame.image.load("Images/Numbers/0.png")).convert_alpha()
@@ -46,22 +44,22 @@ class NumberEngine:
 		cls.symbols_rects['9'] = cls.symbols_surfaces['9'].get_rect()
 		cls.symbols_rects['.'] = cls.symbols_surfaces['.'].get_rect()
 		
-		cls.surface_width = cls.symbols_rects['0'].width * scl.scale_x
-		cls.surface_height = cls.symbols_rects['0'].height * scl.scale_y
+		cls.surface_width = cls.symbols_rects['0'].width
+		cls.surface_height = cls.symbols_rects['0'].height
 		
 		cls.erase_rect = cls.symbols_rects['0']
 	def __init__(self) :
 		pass
 	def print_right_justify(self, num, x, y):
 		num = str(round(num, 1))
-		print num
 		num_chars = len(num)
 		ch_index = num_chars
 		while ch_index > 0:
 			ch_index -= 1
 			ch_order = num_chars - ch_index
 			ch = num[ch_index]
-			blit_location = (x - NumberEngine.surface_width * ch_order, y)
+			NumberEngine.erase_rect.left = x * scl.scale_x - NumberEngine.fixed_char_spacing * ch_order
+			NumberEngine.erase_rect.top = y * scl.scale_y
 			#Erase previous surface
-			NumberEngine.screen.blit(NumberEngine.background_surface, blit_location, NumberEngine.erase_rect)
-			NumberEngine.screen.blit(NumberEngine.symbols_surfaces[ch], blit_location)
+			NumberEngine.screen.blit(NumberEngine.background_surface, NumberEngine.erase_rect, NumberEngine.erase_rect)
+			NumberEngine.screen.blit(NumberEngine.symbols_surfaces[ch], NumberEngine.erase_rect)

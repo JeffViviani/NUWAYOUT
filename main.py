@@ -208,10 +208,11 @@ if my_joystick.get_init():
 			if not door_times:
 				door_manager_1.operate_doors()
 				door_times = 10
+			door_manager_1.refresh_doors()
 			#Manage the timer
 			if time_decisec_from_start != timer:
 				timer = time_decisec_from_start
-				number_engine.print_right_justify(timer / 10, 300, 20)
+				number_engine.print_right_justify(timer / 10, 550, 8)
 		#Refresh the display
 		pygame.display.flip()
 	sys.exit()
