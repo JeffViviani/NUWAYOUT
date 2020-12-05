@@ -80,6 +80,126 @@ fire = False
 last_fire_time = 0
 door_times = 10
 
+def menu_exec():
+	global state, flash, showing_space, next_number, i, clear_last_number, countdown_rect, your_robot, time_start, fire, last_fire_time, door_times, clear_last_number, showing_space, delay_time, generation_time, door_manager_1, timer
+	if Robot.game_over == True:
+		Robot.game_over = None
+		state = 0
+		x = len(Robot.registry); i = 0;
+		while i < x:
+			i += 1
+			Robot.registry.pop(0)
+		x = len(Laser.registry); i = 0;
+		while i < x:
+			i += 1
+			Laser.registry.pop(0)
+		screen.blit(background,background_rect)
+		screen.blit(title, title_rect)
+		pygame.mixer.music.stop() 
+		pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
+		pygame.mixer.music.play()
+	if state == 0:
+		flash = flash + 1
+		if flash > 29:
+			flash = 0
+			showing_space = not showing_space
+		if showing_space:
+			screen.blit(press_button,press_button_rect)
+		else:
+			screen.blit(background,press_button_rect,press_button_rect)
+	elif state == 1:
+		flash += 1
+		if next_number:
+			i -= 1
+			if clear_last_number:
+				screen.blit(background,countdown_rect,countdown_rect)
+				clear_last_number = False
+			if i > 0:
+				countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png")).convert_alpha()
+				countdown_rect = countdown.get_rect()
+				countdown_rect.left = 185 * scl.scale_x
+				countdown_rect.top = 55 * scl.scale_y
+				screen.blit(countdown,countdown_rect)
+				next_number = False
+			else:
+				Robot.game_over = False
+				your_robot = Robot(screen,background,0,None)
+				time_start = pygame.time.get_ticks()
+				generation_time = pygame.time.get_ticks() + 1000
+				door_manager_1 = DoorManager(screen,background)
+				timer = -1
+				state = 2
+		flash += 1
+		if flash > 59:
+			next_number = True
+			clear_last_number = True
+			flash = 0
+	elif state == 2:
+		#Joystick Operation for your robot
+		vertical_joy_axis = my_joystick.get_axis(1)
+		horizontal_joy_axis = my_joystick.get_axis(0)
+		if not your_robot.in_motion:
+			if vertical_joy_axis > 0.9:
+				your_robot.change_dir(1); your_robot.try_move();
+			elif vertical_joy_axis < -0.9:
+				your_robot.change_dir(3); your_robot.try_move();
+			elif horizontal_joy_axis > 0.9:
+				your_robot.change_dir(0); your_robot.try_move();
+			elif horizontal_joy_axis < -0.9:
+				your_robot.change_dir(2); your_robot.try_move();
+		#Control Logic for robot generation
+		time_mil = pygame.time.get_ticks()
+		time_decisec_from_start = floor((time_mil - time_start) / 100)
+		if time_mil > generation_time:
+			x = random()
+			prob_orange = 0.5 * exp((time_start - time_mil)*0.000001) + 0.5
+			if x < prob_orange:
+				color = 1
+			else:
+				color = 2
+			Robot(screen,background,color,door_manager_1)
+			delay_time = exp(-0.00001*(time_mil - time_start)) * 5000 + 200
+			delay_time = delay_time + delay_time * (random() * 0.4 - 0.2)
+			generation_time = delay_time + time_mil
+		#Every frame, work on robot motion
+		for rob in Robot.registry:
+			rob.ai()
+			rob.move()
+		for las in Laser.registry:
+			las.move()
+		#Laser firing
+		if fire and time_mil > last_fire_time + 100:
+			your_robot.fire()
+			last_fire_time = time_mil
+			fire = False
+		#Door management
+		door_times -= 1
+		if not door_times:
+			door_manager_1.operate_doors()
+			door_times = 10
+		door_manager_1.refresh_doors()
+		#Manage the timer
+		if time_decisec_from_start != timer:
+			timer = time_decisec_from_start
+			number_engine.print_right_justify(timer / 10, 550, 8)
+	return
+
+def intermission_exec():
+	return
+def ingame_exec():
+	return
+
+#STATE MACHINE:
+#0 - Main Menu
+#1 - Intermission
+#2 - In-game
+stateexec = {
+	0: menu_exec,
+	1: intermission_exec,
+	2: ingame_exec
+}
+stmc = 0
+
 if config.MUSIC:
 	#Play music
 	pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
@@ -113,108 +233,11 @@ if my_joystick.get_init():
 					fire = True
 		clock.tick(75) #60FPS
 		
-		if Robot.game_over == True:
-			Robot.game_over = None
-			state = 0
-			x = len(Robot.registry); i = 0;
-			while i < x:
-				i += 1
-				Robot.registry.pop(0)
-			x = len(Laser.registry); i = 0;
-			while i < x:
-				i += 1
-				Laser.registry.pop(0)
-			screen.blit(background,background_rect)
-			screen.blit(title, title_rect)
-			pygame.mixer.music.stop() 
-			pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
-			pygame.mixer.music.play()
-		if state == 0:
-			flash = flash + 1
-			if flash > 29:
-				flash = 0
-				showing_space = not showing_space
-			if showing_space:
-				screen.blit(press_button,press_button_rect)
-			else:
-				screen.blit(background,press_button_rect,press_button_rect)
-		elif state == 1:
-			flash += 1
-			if next_number:
-				i -= 1
-				if clear_last_number:
-					screen.blit(background,countdown_rect,countdown_rect)
-					clear_last_number = False
-				if i > 0:
-					countdown = scl.scale(pygame.image.load("Images/HUD/big" + str(i) + ".png")).convert_alpha()
-					countdown_rect = countdown.get_rect()
-					countdown_rect.left = 185 * scl.scale_x
-					countdown_rect.top = 55 * scl.scale_y
-					screen.blit(countdown,countdown_rect)
-					next_number = False
-				else:
-					Robot.game_over = False
-					your_robot = Robot(screen,background,0,None)
-					time_start = pygame.time.get_ticks()
-					generation_time = pygame.time.get_ticks() + 1000
-					door_manager_1 = DoorManager(screen,background)
-					timer = -1
-					state = 2
-			flash += 1
-			if flash > 59:
-				next_number = True
-				clear_last_number = True
-				flash = 0
-		elif state == 2:
-			#Joystick Operation for your robot
-			vertical_joy_axis = my_joystick.get_axis(1)
-			horizontal_joy_axis = my_joystick.get_axis(0)
-			if not your_robot.in_motion:
-				if vertical_joy_axis > 0.9:
-					your_robot.change_dir(1); your_robot.try_move();
-				elif vertical_joy_axis < -0.9:
-					your_robot.change_dir(3); your_robot.try_move();
-				elif horizontal_joy_axis > 0.9:
-					your_robot.change_dir(0); your_robot.try_move();
-				elif horizontal_joy_axis < -0.9:
-					your_robot.change_dir(2); your_robot.try_move();
-			#Control Logic for robot generation
-			time_mil = pygame.time.get_ticks()
-			time_decisec_from_start = floor((time_mil - time_start) / 100)
-			if time_mil > generation_time:
-				x = random()
-				prob_orange = 0.5 * exp((time_start - time_mil)*0.000001) + 0.5
-				if x < prob_orange:
-					color = 1
-				else:
-					color = 2
-				Robot(screen,background,color,door_manager_1)
-				delay_time = exp(-0.00001*(time_mil - time_start)) * 5000 + 200
-				delay_time = delay_time + delay_time * (random() * 0.4 - 0.2)
-				generation_time = delay_time + time_mil
-			#Every frame, work on robot motion
-			for rob in Robot.registry:
-				rob.ai()
-				rob.move()
-			for las in Laser.registry:
-				las.move()
-			#Laser firing
-			if fire and time_mil > last_fire_time + 100:
-				your_robot.fire()
-				last_fire_time = time_mil
-				fire = False
-			#Door management
-			door_times -= 1
-			if not door_times:
-				door_manager_1.operate_doors()
-				door_times = 10
-			door_manager_1.refresh_doors()
-			#Manage the timer
-			if time_decisec_from_start != timer:
-				timer = time_decisec_from_start
-				number_engine.print_right_justify(timer / 10, 550, 8)
-		#Refresh the display
+		#Execute state machine
+		stateexec[stmc]()
+		
+		
 		pygame.display.flip()
 	sys.exit()
-
+	
 
