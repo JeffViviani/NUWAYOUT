@@ -11,6 +11,6 @@ def file_to_list(file):
 		elif c == '\n':
 			lst.append(sub_lst)
 			sub_lst = []
-		else:
+		elif c != '\r':
 			sub_lst.append(int(c))
 	return lst
