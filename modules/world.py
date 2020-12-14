@@ -1,0 +1,70 @@
+from math import floor
+from copy import copy
+import pygame
+from filestream import *
+
+GAME_NATIVE_W = 576
+GAME_NATIVE_H = 432
+
+class World:
+	def __init__(self, screen):
+		self.screen = screen
+		self.camera_x = None
+		self.camera_y = None
+		self.bgnd_tiles = []
+		self.occupancy = []
+		displayInfo = pygame.display.Info()
+		self.scale_x = displayInfo.current_w / GAME_NATIVE_W
+		self.scale_y = displayInfo.current_h / GAME_NATIVE_H
+		self.tile_surfaces = []
+		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile0.png")))
+		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile1.png")))
+		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile2.png")))
+		self.tile_pixel_w = 20 * self.scale_x
+		self.tile_pixel_h = 20 * self.scale_y
+		
+		
+	def load_world(self, file):
+		self.bgnd_tiles = file_to_list(file)
+		self.occupancy = copy(self.bgnd_tiles)
+		zero_list(self.occupancy)
+		print( self.bgnd_tiles )
+		
+	def scale(self, surface):
+		current_w = surface.get_width()
+		current_h = surface.get_height()
+		return pygame.transform.scale(surface,(int(floor(current_w * self.scale_x)), int(floor(current_h * self.scale_y))))
+
+	def render(self):
+		
+		#Begin one tile to the left
+		frame = pygame.Rect(0, 0, self.tile_pixel_w, self.tile_pixel_h)
+		tile_x_pos_init = floor(self.camera_x / 20)
+		tile_y_pos_init = floor(self.camera_y / 20)
+		tile_x_pos_max = tile_x_pos_init + 30
+		tile_y_pos_max = tile_y_pos_init + 27
+		row_ref = None
+		tile_y_pos = tile_y_pos_init
+		while tile_y_pos < tile_y_pos_max:
+			if tile_y_pos >= len(self.bgnd_tiles):
+				break
+			row_ref = self.bgnd_tiles[tile_y_pos]
+			tile_x_pos = tile_x_pos_init
+			frame.left = 0
+			while tile_x_pos < tile_x_pos_max:
+				if tile_x_pos >= len(row_ref):
+					break
+				print(row_ref)
+				self.screen.blit(self.tile_surfaces[row_ref[tile_x_pos]], frame)
+				frame = frame.move(self.tile_pixel_w, 0)
+				print(frame.left)
+				tile_x_pos = tile_x_pos + 1
+			frame = frame.move(0, self.tile_pixel_h)
+			tile_y_pos = tile_y_pos + 1
+
+def zero_list(lst):
+	for i in lst:
+		if isinstance(i, list):
+			zero_list(i)
+		else:
+			i = 0
