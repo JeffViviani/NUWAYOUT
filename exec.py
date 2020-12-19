@@ -2,6 +2,7 @@ import sys
 sys.path.insert(1, 'modules/')
 
 import pygame
+import config
 from world import *
 
 clock = pygame.time.Clock()
@@ -22,9 +23,19 @@ while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
-		elif event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_ESCAPE:
-				running = False
+	keys = pygame.key.get_pressed()
+	if config.MODE_MAP_TEST == 1:
+		if keys[pygame.K_ESCAPE]:
+			running = False
+		if keys[pygame.K_RIGHT]:
+			wor.pan(4,0)
+		if keys[pygame.K_LEFT]:
+			wor.pan(-4,0)
+		if keys[pygame.K_UP]:
+			wor.pan(0,-4)
+		if keys[pygame.K_DOWN]:
+			wor.pan(0,4)
+				
 	clock.tick(60)
 	wor.render()
 	pygame.display.flip()
