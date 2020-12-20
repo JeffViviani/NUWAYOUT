@@ -4,6 +4,14 @@ sys.path.insert(1, 'modules/')
 import pygame
 import config
 from world import *
+from robot import *
+
+def load_enemies(world, pagetable, file):
+	enemy_list = file_to_1D_list(file)
+	index = 0
+	while index < len(enemy_list):
+		new_robot = Robot()
+		
 
 clock = pygame.time.Clock()
 

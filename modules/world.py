@@ -26,7 +26,7 @@ class World:
 		
 		
 	def load_world(self, file):
-		self.bgnd_tiles = file_to_list(file)
+		self.bgnd_tiles = file_to_2D_list(file)
 		self.occupancy = copy(self.bgnd_tiles)
 		zero_list(self.occupancy)
 		print( self.bgnd_tiles )
