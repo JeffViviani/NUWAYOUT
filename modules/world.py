@@ -39,8 +39,8 @@ class World:
 	def render(self):
 		#Begin one tile to the left
 		frame = pygame.Rect(0, 0 - self.camera_y % self.tile_pixel_h, self.tile_pixel_w, self.tile_pixel_h)
-		tile_x_pos_init = floor(self.camera_x / self.tile_pixel_w)
-		tile_y_pos_init = floor(self.camera_y / self.tile_pixel_h)
+		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
+		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
 		tile_x_pos_max = tile_x_pos_init + 30
 		tile_y_pos_max = tile_y_pos_init + 27
 		row_ref = None

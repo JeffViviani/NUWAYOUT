@@ -1,7 +1,7 @@
 def file_to_2D_list(file):
 	lst = []
 	sub_lst = []
-	raw_file = open(file, mode='r', errors='strict')
+	raw_file = open(file, mode='r')
 	while True:
 		c = raw_file.read(1)
 		if c == '':

@@ -19,7 +19,7 @@ pygame.init()
 displayInfo = pygame.display.Info()
 screen_width = displayInfo.current_w
 screen_height = displayInfo.current_h
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 32)
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 8)
 wor = World(screen)
 wor.load_world("data/world1.txt")
 wor.camera_x = 0
