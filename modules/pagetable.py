@@ -1,4 +1,4 @@
-from math import ceiling
+from math import ceil
 import world
 PAGETABLE_N = 30
 
@@ -7,8 +7,8 @@ class PageTable:
 		self.table = []
 		
 	def load_blank(self, world):
-		num_indices = ceiling(len(world.bgnd_tiles) / PAGETABLE_N)
-		num_sub_indices = ceiling(len(world.bgnd_tiles[0]) / PAGETABLE_N)
+		num_indices = int(ceil(len(world.bgnd_tiles) / float(PAGETABLE_N)))
+		num_sub_indices = int(ceil(len(world.bgnd_tiles[0]) / float(PAGETABLE_N)))
 		self.table = []
 		index = 0
 		while index < num_indices:
@@ -19,14 +19,16 @@ class PageTable:
 				sub_index = sub_index + 1
 			index = index + 1
 			
-	def get_page(row, col):
+	def get_page(self, row, col):
 		return self.table[row][col]
 		
-	def set_page(row, col, lst = []):
+	def set_page(self, row, col, lst = []):
 		self.table[row][col] = lst
 		
-	def remove_obj(row, col, index):
+	def remove_obj(self, row, col, index):
 		del self.table[row][col][index]
 		
-	def add_obj(row, col, obj):
+	def add_obj(self, row, col, obj):
+		print row
+		print col
 		self.table[row][col].append(obj)

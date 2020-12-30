@@ -17,15 +17,16 @@ def file_to_2D_list(file):
 def file_to_1D_list(file):
 	lst = []
 	item = ""
+	raw_file = open(file, mode='r')
 	while True:
 		c = raw_file.read(1)
 		if c == '':
-			lst.append(sub_lst)
+			lst.append(int(item))
 			item = ""
 			break
 		elif c == '\n':
 			lst.append(int(item))
 			item = ""
 		elif c != '\r':
-			item = item + char(c)
+			item = item + str(c)
 	return lst
