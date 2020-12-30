@@ -14,9 +14,9 @@ class Robot:
 		self.base_costume = type * 4
 		self.costume = self.base_costume
 		self.tile_x = tile_x_init
-		self.x = tile_x_init * 20
+		self.x = tile_x_init * 20 * self.world.scale_x
 		self.tile_y = tile_y_init
-		self.y = tile_y_init * 20
+		self.y = tile_y_init * 20 * self.world.scale_y
 		self.calc_page()
 		self.page_row = None
 		self.page_col = None
@@ -68,7 +68,7 @@ class Robot:
 		self.page_col = int(floor(self.tile_x / PAGETABLE_N))
 		
 	def render(self):
-		self.world.screen.blit(Robot.image_surfaces[self.costume], self.frame)
+		self.world.screen.blit(Robot.image_surfaces[self.costume], (self.x - self.world.camera_x, self.y - self.world.camera_y))
 	
 	def leave_page(self):
 		index = 0

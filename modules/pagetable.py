@@ -9,6 +9,10 @@ class PageTable:
 	def load_blank(self, world):
 		num_indices = int(ceil(len(world.bgnd_tiles) / float(PAGETABLE_N)))
 		num_sub_indices = int(ceil(len(world.bgnd_tiles[0]) / float(PAGETABLE_N)))
+		print "rows in page table:"
+		print num_indices
+		print "cols in page table:"
+		print num_sub_indices
 		self.table = []
 		index = 0
 		while index < num_indices:
@@ -29,6 +33,5 @@ class PageTable:
 		del self.table[row][col][index]
 		
 	def add_obj(self, row, col, obj):
-		print row
-		print col
+		print "Add object to row " + str(row) + " and column " + str(col)
 		self.table[row][col].append(obj)

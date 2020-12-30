@@ -40,7 +40,7 @@ class World:
 		frame = pygame.Rect(0, 0 - self.camera_y % self.tile_pixel_h, self.tile_pixel_w, self.tile_pixel_h)
 		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
 		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
-		tile_x_pos_max = tile_x_pos_init + 30
+		tile_x_pos_max = tile_x_pos_init + 33
 		tile_y_pos_max = tile_y_pos_init + 27
 		row_ref = None
 		tile_y_pos = tile_y_pos_init
@@ -48,7 +48,7 @@ class World:
 			if tile_y_pos >= len(self.bgnd_tiles) or tile_y_pos < 0:
 				tile_x_pos = tile_x_pos_init
 				frame.left = 0 - (self.camera_x % self.tile_pixel_w)
-				tile_to_blit = self.tile_surfaces[2]
+				tile_to_blit = self.tile_surfaces[3]
 				while tile_x_pos < tile_x_pos_max:
 					self.screen.blit(tile_to_blit, frame)
 					frame = frame.move(self.tile_pixel_w, 0)
@@ -60,7 +60,7 @@ class World:
 				while tile_x_pos < tile_x_pos_max:
 					tile_to_blit = None
 					if tile_x_pos >= len(row_ref) or tile_x_pos < 0:
-						tile_to_blit = self.tile_surfaces[2]
+						tile_to_blit = self.tile_surfaces[3]
 					else:
 						tile_to_blit = self.tile_surfaces[row_ref[tile_x_pos]]
 					self.screen.blit(tile_to_blit, frame)
