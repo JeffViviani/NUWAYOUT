@@ -20,7 +20,6 @@ def load_enemies(world, pagetable, file):
 	enemy_list = file_to_1D_list(file)
 	num_items = len(enemy_list)
 	item = 0
-	print num_items
 	while item < num_items:
 		new_robot = Robot(world, pagetable, enemy_list[item], enemy_list[item + 1], enemy_list[item + 2])
 		item = item + 3
@@ -42,7 +41,6 @@ pygame.init()
 clock = pygame.time.Clock()
 displayInfo = pygame.display.Info()
 screen_width = displayInfo.current_w
-print screen_width
 screen_height = displayInfo.current_h
 screen = None
 if config.FULLSCREEN:
@@ -209,7 +207,6 @@ while True:
 #####################################################
 
 	if game_state == 2:
-		print "TRYING TO QUIT"
 		pygame.display.quit()
 		pygame.quit()
 		sys.exit()

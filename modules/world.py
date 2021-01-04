@@ -21,8 +21,8 @@ class World:
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile1.png")))
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile2.png")))
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile3.png")))
-		self.tile_pixel_w = 20 * self.scale_x
-		self.tile_pixel_h = 20 * self.scale_y
+		self.tile_pixel_w = int(floor(20 * self.scale_x))
+		self.tile_pixel_h = int(floor(20 * self.scale_y))
 		
 		
 	def load_world(self, file):

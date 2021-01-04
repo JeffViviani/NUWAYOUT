@@ -14,9 +14,9 @@ class Robot:
 		self.base_costume = type * 4
 		self.costume = self.base_costume
 		self.tile_x = tile_x_init
-		self.x = tile_x_init * 20 * self.world.scale_x
+		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
-		self.y = tile_y_init * 20 * self.world.scale_y
+		self.y = tile_y_init * self.world.tile_pixel_h
 		self.calc_page()
 		self.page_row = None
 		self.page_col = None
