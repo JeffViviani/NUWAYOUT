@@ -15,6 +15,7 @@ class Typewriter:
 		cls.charbank[' '] = world.scale(pygame.image.load("Images/font/space.png"))
 		cls.charbank[','] = world.scale(pygame.image.load("Images/font/comma.png"))
 		cls.charbank['.'] = world.scale(pygame.image.load("Images/font/period.png"))
+		cls.charbank['-'] = world.scale(pygame.image.load("Images/font/hyphen.png"))
 		cls.charbank['A'] = world.scale(pygame.image.load("Images/font/A.png"))
 		cls.charbank['B'] = world.scale(pygame.image.load("Images/font/B.png"))
 		cls.charbank['C'] = world.scale(pygame.image.load("Images/font/C.png"))
@@ -64,3 +65,12 @@ class Typewriter:
 			self.newline()
 		else:
 			self.cursor_x = self.cursor_x + Typewriter.letter_width + Typewriter.letter_spacing
+			
+	def can_fit(self, word):
+		return self.cursor_x + Typewriter.letter_width * len(word) < self.world.displayInfo.current_w
+			
+	def print_word(self, word):
+		if not self.can_fit(word):
+			self.newline()
+		for c in word:
+			self.print(c)

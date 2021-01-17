@@ -94,7 +94,7 @@ press_btn_box_frame = (200 * world.scale_x, 200 * world.scale_y)
 press_btn2_box_surface = world.scale(pygame.image.load("Images/HUD/pressButton2.png"))
 press_btn2_fill_black = press_btn2_box_surface.copy()
 press_btn2_fill_black.fill((0,0,0))
-press_btn2_box_frame = (200 * world.scale_x, 400 * world.scale_y)
+press_btn2_box_frame = (140 * world.scale_x, 310 * world.scale_y)
 
 #Initialize your robot
 your_robot = Robot(world, pagetable, 0, 4, 11)
@@ -155,63 +155,64 @@ while True:
 	blink_state = 0
 	level = 0
 	
-	pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
-	pygame.mixer.music.play(-1)
+	if game_state == 0:
+		pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
+		pygame.mixer.music.play(-1)
+		
+		while game_state == 0:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					game_state = 2
 
-	while game_state == 0:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
+			keys = pygame.key.get_pressed()
+			if keys[pygame.K_ESCAPE]:
 				game_state = 2
+				break
+			if keys[pygame.K_SPACE]:
+				menu_proceed_state = 1
 
-		keys = pygame.key.get_pressed()
-		if keys[pygame.K_ESCAPE]:
-			game_state = 2
-			break
-		if keys[pygame.K_SPACE]:
-			menu_proceed_state = 1
-
-		blink_counter = blink_counter + 1
-		if blink_state:
-			if blink_counter == 15:
-				blink_state = 0
-				blink_counter = 0
-		else:
-			if blink_counter == 4:
-				blink_state = 1
-				blink_counter = 0
-
-		if menu_scroll_state == 0:
-			world.camera_x = world.camera_x + 2
-			if world.camera_x == 2500:
-				menu_scroll_state = 1
-		elif menu_scroll_state == 1:
-			world.camera_y = world.camera_y + 2
-			if world.camera_y == 1000:
-				menu_scroll_state = 2
-		elif menu_scroll_state == 2:
-			world.camera_x = world.camera_x - 2
-			if world.camera_x == 0:
-				menu_scroll_state = 3
-		elif menu_scroll_state == 3:
-			world.camera_y = world.camera_y - 2
-			if world.camera_y == 0:
-				menu_scroll_state = 0
-					
-		clock.tick(30)
-		world.render()
-		render_page(pagetable, 0, 0)
-		render_page(pagetable, 0, 1)
-		screen.blit(title_surface, title_frame)
-		if blink_state:
-			screen.blit(press_btn_box_surface, press_btn_box_frame)
-		if menu_proceed_state:
-			if checker_counter < 12:
-				checker_s.blit(checker, (checker_counter % 4 * checker_width, floor(checker_counter / 4) * checker_height))
-				checker_counter = checker_counter + 1
+			blink_counter = blink_counter + 1
+			if blink_state:
+				if blink_counter == 15:
+					blink_state = 0
+					blink_counter = 0
 			else:
-				game_state = 1
-			screen.blit(checker_s, (0,0))
-		pygame.display.flip()
+				if blink_counter == 4:
+					blink_state = 1
+					blink_counter = 0
+
+			if menu_scroll_state == 0:
+				world.camera_x = world.camera_x + 2
+				if world.camera_x == 2500:
+					menu_scroll_state = 1
+			elif menu_scroll_state == 1:
+				world.camera_y = world.camera_y + 2
+				if world.camera_y == 1000:
+					menu_scroll_state = 2
+			elif menu_scroll_state == 2:
+				world.camera_x = world.camera_x - 2
+				if world.camera_x == 0:
+					menu_scroll_state = 3
+			elif menu_scroll_state == 3:
+				world.camera_y = world.camera_y - 2
+				if world.camera_y == 0:
+					menu_scroll_state = 0
+						
+			clock.tick(30)
+			world.render()
+			render_page(pagetable, 0, 0)
+			render_page(pagetable, 0, 1)
+			screen.blit(title_surface, title_frame)
+			if blink_state:
+				screen.blit(press_btn_box_surface, press_btn_box_frame)
+			if menu_proceed_state:
+				if checker_counter < 12:
+					checker_s.blit(checker, (checker_counter % 4 * checker_width, floor(checker_counter / 4) * checker_height))
+					checker_counter = checker_counter + 1
+				else:
+					game_state = 1
+				screen.blit(checker_s, (0,0))
+			pygame.display.flip()
 
 #####################################################
 #####################################################
@@ -235,6 +236,10 @@ while True:
 		message_file = open("data/messages/" + str(level) + ".txt")
 		fps = 14
 		
+		char_buffer = ""
+		
+		eof = False
+		
 		while game_state == 1:
 			
 			for event in pygame.event.get():
@@ -249,11 +254,32 @@ while True:
 				fps = 120
 			else:
 				fps = 14
-				
-			char = message_file.read(1)
-			if char != '':
-				typewriter.print(char)
-			else:
+			
+			
+			if len(char_buffer) == 0 and eof == False:
+				end_marker = False
+				while not end_marker:
+					char = message_file.read(1)
+					if char != '':
+						if char == ' ' or char == '\n':
+							if typewriter.can_fit(char_buffer):
+								if char == '\n':
+									char_buffer = char_buffer + char
+								elif typewriter.can_fit(char_buffer + ' '):
+									char_buffer = char_buffer + char
+							else:
+								char_buffer = '\n' + char_buffer + char
+							end_marker = True
+						else:
+							char_buffer = char_buffer + char
+					else:
+						eof = True
+						end_marker = True
+						
+			typewriter.print(char_buffer[0])
+			if len(char_buffer) > 0:
+				char_buffer = char_buffer[1:]
+			if eof and len(char_buffer) == 0:
 				game_state = 3
 				
 			clock.tick(fps)
@@ -280,10 +306,14 @@ while True:
 #####################################################
 #####################################################
 
-	blink_state = 0
-	blink_counter = 0
-
 	if game_state == 3:
+		blink_state = 0
+		blink_counter = 0
+		space_ready = 1
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_SPACE]:
+			space_ready = 0
+			
 		while game_state == 3:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
@@ -295,8 +325,11 @@ while True:
 				break
 				
 			if keys[pygame.K_SPACE]:
-				game_state = 2
-				break
+				if space_ready == 1:
+					game_state = 2
+					break
+			else:
+				space_ready = 1
 				
 			if blink_state == 0:
 				screen.blit(press_btn2_box_surface, press_btn2_box_frame)
@@ -304,8 +337,14 @@ while True:
 				screen.blit(press_btn2_fill_black, press_btn2_box_frame)
 				
 			blink_counter = blink_counter + 1
-			#if blink_state == 0:
-				
+			if blink_state == 0:
+				if blink_counter == 10:
+					blink_state = 1
+					blink_counter = 0
+			else:
+				if blink_counter == 5:
+					blink_state = 0
+					blink_counter = 0
 				
 			clock.tick(30)
 			pygame.display.flip()
