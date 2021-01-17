@@ -13,9 +13,9 @@ class World:
 		self.camera_y = None
 		self.bgnd_tiles = []
 		self.occupancy = []
-		displayInfo = pygame.display.Info()
-		self.scale_x = displayInfo.current_w / GAME_NATIVE_W
-		self.scale_y = displayInfo.current_h / GAME_NATIVE_H
+		self.displayInfo = pygame.display.Info()
+		self.scale_x = self.displayInfo.current_w / GAME_NATIVE_W
+		self.scale_y = self.displayInfo.current_h / GAME_NATIVE_H
 		self.tile_surfaces = []
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile0.png")))
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile1.png")))
