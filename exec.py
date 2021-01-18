@@ -36,7 +36,7 @@ def render_page(pagetable, row, col):
 	try:
 		for robot in pagetable.get_page(row,col):
 			robot.render()
-			return
+		return
 	except TypeError:
 		return
 
@@ -86,9 +86,6 @@ checker_s.fill((255, 255, 255))
 pagetable = PageTable()
 pagetable.load_blank(world)
 
-#Generate all robots
-load_robots(world, pagetable, "data/robots1.txt")
-
 #Initialize the camera
 world.camera_x = 0
 world.camera_y = 0
@@ -107,7 +104,7 @@ press_btn2_fill_black.fill((0,0,0))
 press_btn2_box_frame = (140 * world.scale_x, 310 * world.scale_y)
 
 #Initialize your robot
-your_robot = Robot(world, pagetable, 0, 4, 11)
+#your_robot = Robot(world, pagetable, 0, 4, 11)
 
 #Game state
 game_state = 0 #main menu
@@ -168,6 +165,9 @@ while True:
 	if game_state == 0:
 		pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
 		pygame.mixer.music.play(-1)
+		
+		#Generate all robots
+		load_robots(world, pagetable, "data/robots1.txt")
 		
 		while game_state == 0:
 			for event in pygame.event.get():

@@ -27,8 +27,6 @@ class Robot:
 		self.pos_offset = 0
 		self.frame = (0, 0)
 		self.pagetable.add_obj(self.page_row, self.page_col, self)
-		print(str(self.page_row) + "row")
-		print(str(self.page_col) + "col")
 		self.id = Robot.id_counter
 		#neutral
 		self.control_state = 0
@@ -116,12 +114,13 @@ class Robot:
 	
 	def leave_page(self):
 		index = 0
-		my_page = self.pagetable[self.page_row][self.page_col]
+		my_page = self.pagetable.get_page(self.page_row,self.page_col)
 		num_indices = len(my_page)
 		while index < num_indices:
 			if my_page[index] == self:
-				del self.pagetable[self.page_row][self.page_col][index]
+				self.pagetable.remove_obj(self.page_row,self.page_col,index)
 				break
+			index = index + 1
 
 	def join_page(self):
 		self.pagetable[self.page_row][self.page_col].append(self)
@@ -142,6 +141,7 @@ class Robot:
 					self.control_state = 1
 					self.movement_progress = 0
 					self.costume = self.base_costume + 0
+					self.validate_page_col()
 			except IndexError:
 				return
 				
@@ -158,6 +158,8 @@ class Robot:
 					self.control_state = 2
 					self.movement_progress = 0
 					self.costume = self.base_costume + 1
+					self.validate_page_row()
+					
 			except IndexError:
 				return
 				
@@ -174,6 +176,8 @@ class Robot:
 					self.control_state = 3
 					self.movement_progress = 0
 					self.costume = self.base_costume + 2
+					self.validate_page_col()
+					
 			except IndexError:
 				return
 				
@@ -190,5 +194,22 @@ class Robot:
 					self.control_state = 4
 					self.movement_progress = 0
 					self.costume = self.base_costume + 3
+					self.validate_page_row()
 			except IndexError:
 				return
+	
+	#Checks if its page row is correct, and if not, changes it.
+	def validate_page_row(self):
+		previous_page_row = self.page_row
+		self.calc_page_row()
+		if self.page_row != previous_page_row:
+			self.leave_page()
+			self.join_page()
+	
+	#Checks if its page column is correct, and if not, changes it.
+	def validate_page_col(self):
+		previous_page_col = self.page_col
+		self.calc_page_col()
+		if self.page_col != previous_page_col:
+			self.leave_page()
+			self.join_page()
