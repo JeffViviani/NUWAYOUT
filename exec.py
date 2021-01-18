@@ -18,17 +18,27 @@ from math import floor
 #####################################################
 #####################################################
 
-def load_enemies(world, pagetable, file):
+def load_robots(world, pagetable, file):
 	enemy_list = file_to_1D_list(file)
 	num_items = len(enemy_list)
 	item = 0
+	first = 0
+	firstRef = None
 	while item < num_items:
 		new_robot = Robot(world, pagetable, enemy_list[item], enemy_list[item + 1], enemy_list[item + 2])
 		item = item + 3
+		if first == 0:
+			first = 1
+			firstRef = new_robot
+	return firstRef
 		
 def render_page(pagetable, row, col):
-	for robot in pagetable.get_page(row,col):
-		robot.render()
+	try:
+		for robot in pagetable.get_page(row,col):
+			robot.render()
+			return
+	except TypeError:
+		return
 
 #####################################################
 #####################################################
@@ -76,8 +86,8 @@ checker_s.fill((255, 255, 255))
 pagetable = PageTable()
 pagetable.load_blank(world)
 
-#Generate all enemies
-load_enemies(world, pagetable, "data/enemies1.txt")
+#Generate all robots
+load_robots(world, pagetable, "data/robots1.txt")
 
 #Initialize the camera
 world.camera_x = 0
@@ -135,11 +145,11 @@ while True:
 			if keys[pygame.K_DOWN]:
 				world.pan(0,8)
 					
-		clock.tick(30)
 		world.render()
 		render_page(pagetable, 0, 0)
 		render_page(pagetable, 0, 1)
 		pygame.display.flip()
+		clock.tick(30)
 
 #####################################################
 #####################################################
@@ -251,7 +261,7 @@ while True:
 				game_state = 2
 				break
 			if keys[pygame.K_SPACE]:
-				fps = 120
+				fps = 300
 			else:
 				fps = 14
 			
@@ -326,7 +336,7 @@ while True:
 				
 			if keys[pygame.K_SPACE]:
 				if space_ready == 1:
-					game_state = 2
+					game_state = 4
 					break
 			else:
 				space_ready = 1
@@ -348,3 +358,64 @@ while True:
 				
 			clock.tick(30)
 			pygame.display.flip()
+			
+#####################################################
+#####################################################
+#####################################################
+##############    MAIN OPERATION    #################
+#####################################################
+#####################################################
+#####################################################
+
+	if game_state == 4:
+	
+		pygame.mixer.music.stop()
+		pygame.mixer.music.load("Audio/Space.mp2")
+		pygame.mixer.music.play(-1)
+		
+		world.load_world("data/world" + str(level) + ".txt")
+		pagetable.load_blank(world)
+		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
+		
+		while game_state == 4:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					game_state = 2
+			
+			keys = pygame.key.get_pressed()
+			if keys[pygame.K_ESCAPE]:
+				game_state = 2
+				break
+				
+			#Control of your_robot
+			if keys[pygame.K_RIGHT]:
+				your_robot.try_move_right()
+			if keys[pygame.K_DOWN]:
+				your_robot.try_move_down()
+			if keys[pygame.K_LEFT]:
+				your_robot.try_move_left()
+			if keys[pygame.K_UP]:
+				your_robot.try_move_up()
+				
+			your_robot.automated_control()
+			your_robot.calc_page()
+			world.focus_camera(your_robot)
+			world.render()
+			
+			#Render pages around your_robot
+			render_page(pagetable, your_robot.page_row-1, your_robot.page_col-1)
+			render_page(pagetable, your_robot.page_row, your_robot.page_col-1)
+			render_page(pagetable, your_robot.page_row+1, your_robot.page_col-1)
+			render_page(pagetable, your_robot.page_row-1, your_robot.page_col)
+			render_page(pagetable, your_robot.page_row, your_robot.page_col)
+			render_page(pagetable, your_robot.page_row+1, your_robot.page_col)
+			render_page(pagetable, your_robot.page_row-1, your_robot.page_col+1)
+			render_page(pagetable, your_robot.page_row, your_robot.page_col+1)
+			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
+			
+			pygame.display.flip()
+			clock.tick(30)
+			
+			
+			
+			

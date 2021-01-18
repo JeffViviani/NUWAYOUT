@@ -1,5 +1,5 @@
 from math import floor
-from copy import copy
+from copy import deepcopy
 import pygame
 from filestream import *
 
@@ -23,17 +23,24 @@ class World:
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile3.png")))
 		self.tile_pixel_w = int(floor(20 * self.scale_x))
 		self.tile_pixel_h = int(floor(20 * self.scale_y))
+		self.camera_focus_offset_x = int(floor(0 - self.tile_pixel_w * 13.5))
+		self.camera_focus_offset_y = int(floor(0 - self.tile_pixel_h * 10.5))
 		
 		
 	def load_world(self, file):
 		self.bgnd_tiles = file_to_2D_list(file)
-		self.occupancy = copy(self.bgnd_tiles)
+		self.occupancy = deepcopy(self.bgnd_tiles)
+		list_consolidate(self.occupancy, 1, 0, 9)
 		zero_list(self.occupancy)
 		
 	def scale(self, surface):
 		current_w = surface.get_width()
 		current_h = surface.get_height()
 		return pygame.transform.scale(surface,(int(floor(current_w * self.scale_x)), int(floor(current_h * self.scale_y))))
+		
+	def focus_camera(self, robot):
+		self.camera_x = robot.x + self.camera_focus_offset_x
+		self.camera_y = robot.y + self.camera_focus_offset_y
 
 	def render(self):
 		#Begin one tile to the left

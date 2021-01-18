@@ -5,22 +5,34 @@ PAGETABLE_N = 30
 class PageTable:
 	def __init__(self):
 		self.table = []
+		self.num_indices = None
+		self.num_sub_indices = None
 		
 	def load_blank(self, world):
-		num_indices = int(ceil(len(world.bgnd_tiles) / float(PAGETABLE_N)))
-		num_sub_indices = int(ceil(len(world.bgnd_tiles[0]) / float(PAGETABLE_N)))
+		self.num_indices = int(ceil(len(world.bgnd_tiles) / float(PAGETABLE_N)))
+		self.num_sub_indices = int(ceil(len(world.bgnd_tiles[0]) / float(PAGETABLE_N)))
 		self.table = []
 		index = 0
-		while index < num_indices:
+		while index < self.num_indices:
 			self.table.append([])
 			sub_index = 0
-			while sub_index < num_sub_indices:
+			while sub_index < self.num_sub_indices:
 				self.table[index].append([])
 				sub_index = sub_index + 1
 			index = index + 1
 			
+	def get_num_rows(self):
+		return self.num_indices
+		
+	def get_num_cols(self):
+		return self.num_sub_indices
+			
+			
 	def get_page(self, row, col):
-		return self.table[row][col]
+		try:
+			return self.table[row][col]
+		except IndexError:
+			return None
 		
 	def set_page(self, row, col, lst = []):
 		self.table[row][col] = lst

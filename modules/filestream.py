@@ -30,3 +30,15 @@ def file_to_1D_list(file):
 		elif c != '\r':
 			item = item + str(c)
 	return lst
+
+#Takes an any-dimensional list and replaces all instances of 'target' with 'value'. All other values are
+#changed to 'ow'.
+def list_consolidate(lst, target, value, ow):
+	for item in range(len(lst)):
+		if isinstance(lst[item], list):
+			list_consolidate(lst[item], target, value, ow)
+		elif isinstance(item, int):
+			if lst[item] == target:
+				lst[item] = value
+			else:
+				lst[item] = ow

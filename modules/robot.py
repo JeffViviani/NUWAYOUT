@@ -11,12 +11,13 @@ class Robot:
 		self.world = world
 		self.pagetable = pagetable
 		self.type = type
-		self.base_costume = type * 4
+		self.base_costume = (type - 1) * 4
 		self.costume = self.base_costume
 		self.tile_x = tile_x_init
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
 		self.y = tile_y_init * self.world.tile_pixel_h
+		world.occupancy[self.tile_y][self.tile_x] = self.type
 		self.calc_page()
 		self.page_row = None
 		self.page_col = None
@@ -26,7 +27,14 @@ class Robot:
 		self.pos_offset = 0
 		self.frame = (0, 0)
 		self.pagetable.add_obj(self.page_row, self.page_col, self)
+		print(str(self.page_row) + "row")
+		print(str(self.page_col) + "col")
 		self.id = Robot.id_counter
+		#neutral
+		self.control_state = 0
+		self.movement_progress = 0
+		self.dest_x = None
+		self.dest_y = None
 		Robot.id_counter = Robot.id_counter + 1
 		
 	
@@ -56,6 +64,45 @@ class Robot:
 		cls.image_widths[10] = 18 * world.scale_x
 		cls.image_surfaces[11] = world.scale(pygame.image.load("Images/Robots/red_back.png"))
 		cls.image_widths[11] = 18 * world.scale_x
+		cls.step_size_x = int(floor(world.tile_pixel_w / 4))
+		cls.step_size_y = int(floor(world.tile_pixel_h / 4))
+		
+	#should be called once per frame
+	def automated_control(self):
+		#If in process of moving rightward
+		if self.control_state == 1:
+			self.movement_progress = self.movement_progress + 1
+			if self.movement_progress == 4:
+				self.x = self.dest_x
+				self.control_state = 0
+			else:
+				self.x = self.x + Robot.step_size_x
+			return
+		if self.control_state == 2:
+			self.movement_progress = self.movement_progress + 1
+			if self.movement_progress == 4:
+				self.y = self.dest_y
+				self.control_state = 0
+			else:
+				self.y = self.y + Robot.step_size_y
+			return
+		if self.control_state == 3:
+			self.movement_progress = self.movement_progress + 1
+			if self.movement_progress == 4:
+				self.x = self.dest_x
+				self.control_state = 0
+			else:
+				self.x = self.x - Robot.step_size_x
+			return
+		if self.control_state == 4:
+			self.movement_progress = self.movement_progress + 1
+			if self.movement_progress == 4:
+				self.y = self.dest_y
+				self.control_state = 0
+			else:
+				self.y = self.y - Robot.step_size_y
+			return
+		
 
 	def calc_page(self):
 		self.page_row = int(floor(self.tile_y / PAGETABLE_N))
@@ -66,9 +113,6 @@ class Robot:
 
 	def calc_page_col(self):
 		self.page_col = int(floor(self.tile_x / PAGETABLE_N))
-		
-	def render(self):
-		self.world.screen.blit(Robot.image_surfaces[self.costume], (self.x - self.world.camera_x, self.y - self.world.camera_y))
 	
 	def leave_page(self):
 		index = 0
@@ -81,3 +125,70 @@ class Robot:
 
 	def join_page(self):
 		self.pagetable[self.page_row][self.page_col].append(self)
+		
+	def render(self):
+		self.world.screen.blit(Robot.image_surfaces[self.costume], (self.x - self.world.camera_x, self.y - self.world.camera_y))
+	
+	#If capable, initiate rightward movement
+	def try_move_right(self):
+		if self.control_state == 0:
+			#If free to move
+			try:
+				if self.world.occupancy[self.tile_y][self.tile_x + 1] == 0:
+					self.world.occupancy[self.tile_y][self.tile_x] = 0
+					self.tile_x = self.tile_x + 1
+					self.dest_x = self.x + self.world.tile_pixel_w
+					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.control_state = 1
+					self.movement_progress = 0
+					self.costume = self.base_costume + 0
+			except IndexError:
+				return
+				
+	#If capable, initiate downward movement
+	def try_move_down(self):
+		if self.control_state == 0:
+			#If free to move
+			try:
+				if self.world.occupancy[self.tile_y + 1][self.tile_x] == 0:
+					self.world.occupancy[self.tile_y][self.tile_x] = 0
+					self.tile_y = self.tile_y + 1
+					self.dest_y = self.y + self.world.tile_pixel_h
+					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.control_state = 2
+					self.movement_progress = 0
+					self.costume = self.base_costume + 1
+			except IndexError:
+				return
+				
+	#If capable, initiate leftward movement
+	def try_move_left(self):
+		if self.control_state == 0:
+			#If free to move
+			try:
+				if self.world.occupancy[self.tile_y][self.tile_x - 1] == 0:
+					self.world.occupancy[self.tile_y][self.tile_x] = 0
+					self.tile_x = self.tile_x - 1
+					self.dest_x = self.x - self.world.tile_pixel_w
+					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.control_state = 3
+					self.movement_progress = 0
+					self.costume = self.base_costume + 2
+			except IndexError:
+				return
+				
+	#If capable, initiate upward movement
+	def try_move_up(self):
+		if self.control_state == 0:
+			#If free to move
+			try:
+				if self.world.occupancy[self.tile_y - 1][self.tile_x] == 0:
+					self.world.occupancy[self.tile_y][self.tile_x] = 0
+					self.tile_y = self.tile_y - 1
+					self.dest_y = self.y - self.world.tile_pixel_h
+					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.control_state = 4
+					self.movement_progress = 0
+					self.costume = self.base_costume + 3
+			except IndexError:
+				return
