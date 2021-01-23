@@ -6,6 +6,7 @@ import config
 from filestream import *
 from world import *
 from robot import *
+from laser import *
 from pagetable import *
 from typewriter import *
 from math import floor
@@ -67,6 +68,9 @@ world.load_world("data/world0.txt")
 
 #Initialize Robot class
 Robot.init_class(world)
+
+#Initialize Laser class
+Laser.init_class(world)
 
 #Initialize Typewriter class and instantiate object
 Typewriter.init_class(world)
@@ -376,6 +380,7 @@ while True:
 		world.load_world("data/world" + str(level) + ".txt")
 		pagetable.load_blank(world)
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
+		fire_cooldown = 0
 		
 		while game_state == 4:
 			for event in pygame.event.get():
@@ -396,11 +401,19 @@ while True:
 				your_robot.try_move_left()
 			if keys[pygame.K_UP]:
 				your_robot.try_move_up()
+			if keys[pygame.K_SPACE]:
+				if not fire_cooldown:
+					your_robot.fire()
+					fire_cooldown = 3
+					
+			if fire_cooldown > 0:
+				fire_cooldown = fire_cooldown - 1
 				
 			your_robot.automated_control()
 			your_robot.calc_page()
 			world.focus_camera(your_robot)
 			world.render()
+			Laser.process_all_lasers()
 			
 			#Render pages around your_robot
 			render_page(pagetable, your_robot.page_row-1, your_robot.page_col-1)

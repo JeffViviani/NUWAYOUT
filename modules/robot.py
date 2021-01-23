@@ -1,5 +1,6 @@
 import pygame
 from world import *
+from laser import *
 from pagetable import *
 from math import floor
 
@@ -17,7 +18,7 @@ class Robot:
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
 		self.y = tile_y_init * self.world.tile_pixel_h
-		world.occupancy[self.tile_y][self.tile_x] = self.type
+		world.occupancy[self.tile_y][self.tile_x] = self
 		self.calc_page()
 		self.page_row = None
 		self.page_col = None
@@ -111,6 +112,9 @@ class Robot:
 
 	def calc_page_col(self):
 		self.page_col = int(floor(self.tile_x / PAGETABLE_N))
+		
+	def fire(self):
+		Laser(self.world, self)
 	
 	def leave_page(self):
 		index = 0
@@ -123,7 +127,7 @@ class Robot:
 			index = index + 1
 
 	def join_page(self):
-		self.pagetable[self.page_row][self.page_col].append(self)
+		self.pagetable.add_obj(self.page_row,self.page_col,self)
 		
 	def render(self):
 		self.world.screen.blit(Robot.image_surfaces[self.costume], (self.x - self.world.camera_x, self.y - self.world.camera_y))
@@ -131,16 +135,17 @@ class Robot:
 	#If capable, initiate rightward movement
 	def try_move_right(self):
 		if self.control_state == 0:
+			#Point in direction
+			self.costume = self.base_costume + 0
 			#If free to move
 			try:
 				if self.world.occupancy[self.tile_y][self.tile_x + 1] == 0:
 					self.world.occupancy[self.tile_y][self.tile_x] = 0
 					self.tile_x = self.tile_x + 1
 					self.dest_x = self.x + self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.world.occupancy[self.tile_y][self.tile_x] = self
 					self.control_state = 1
 					self.movement_progress = 0
-					self.costume = self.base_costume + 0
 					self.validate_page_col()
 			except IndexError:
 				return
@@ -148,16 +153,17 @@ class Robot:
 	#If capable, initiate downward movement
 	def try_move_down(self):
 		if self.control_state == 0:
+			#Point in direction
+			self.costume = self.base_costume + 1
 			#If free to move
 			try:
 				if self.world.occupancy[self.tile_y + 1][self.tile_x] == 0:
 					self.world.occupancy[self.tile_y][self.tile_x] = 0
 					self.tile_y = self.tile_y + 1
 					self.dest_y = self.y + self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.world.occupancy[self.tile_y][self.tile_x] = self
 					self.control_state = 2
 					self.movement_progress = 0
-					self.costume = self.base_costume + 1
 					self.validate_page_row()
 					
 			except IndexError:
@@ -166,16 +172,17 @@ class Robot:
 	#If capable, initiate leftward movement
 	def try_move_left(self):
 		if self.control_state == 0:
+			#Point in direction
+			self.costume = self.base_costume + 2
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y][self.tile_x - 1] == 0:
+				if self.tile_x >= 1 and self.world.occupancy[self.tile_y][self.tile_x - 1] == 0:
 					self.world.occupancy[self.tile_y][self.tile_x] = 0
 					self.tile_x = self.tile_x - 1
 					self.dest_x = self.x - self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.world.occupancy[self.tile_y][self.tile_x] = self
 					self.control_state = 3
 					self.movement_progress = 0
-					self.costume = self.base_costume + 2
 					self.validate_page_col()
 					
 			except IndexError:
@@ -184,16 +191,17 @@ class Robot:
 	#If capable, initiate upward movement
 	def try_move_up(self):
 		if self.control_state == 0:
+			#Point in direction
+			self.costume = self.base_costume + 3
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y - 1][self.tile_x] == 0:
+				if self.tile_y >= 1 and self.world.occupancy[self.tile_y - 1][self.tile_x] == 0:
 					self.world.occupancy[self.tile_y][self.tile_x] = 0
 					self.tile_y = self.tile_y - 1
 					self.dest_y = self.y - self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y][self.tile_x] = self.type
+					self.world.occupancy[self.tile_y][self.tile_x] = self
 					self.control_state = 4
 					self.movement_progress = 0
-					self.costume = self.base_costume + 3
 					self.validate_page_row()
 			except IndexError:
 				return
