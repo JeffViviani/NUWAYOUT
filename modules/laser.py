@@ -13,25 +13,32 @@ class Laser:
 		self.world = world
 		self.direction = robot.direction
 		self.disperse = False
+		self.x_offset = 0
+		self.y_offset = 0
 		if self.direction == 0:
 			self.tile_x_init = robot.tile_x + 1
 			self.tile_y_init = robot.tile_y
 			self.disperse_tile = self.tile_x_init + 27
+			self.y_offset = Laser.half_tile_height
 		elif self.direction == 1:
 			self.tile_x_init = robot.tile_x
 			self.tile_y_init = robot.tile_y + 1
 			self.disperse_tile = self.tile_y_init + 27
+			self.x_offset = Laser.half_tile_width
 		elif self.direction == 2:
 			self.tile_x_init = robot.tile_x - 1
 			self.tile_y_init = robot.tile_y
 			self.disperse_tile = self.tile_x_init - 27
+			self.y_offset = Laser.half_tile_height
 		elif self.direction == 3:
 			self.tile_x_init = robot.tile_x
 			self.tile_y_init = robot.tile_y - 1
 			self.disperse_tile = self.tile_y_init - 27
+			self.x_offset = Laser.half_tile_width
 		self.tile_x = self.tile_x_init
 		self.tile_y = self.tile_y_init
-		self.position_by_tile(self.tile_x, self.tile_y)
+		self.position_x_by_tile(self.tile_x)
+		self.position_y_by_tile(self.tile_y)
 		Laser.registry.append(self)
 		pygame.mixer.Sound.play(Laser.laser_sound)
 		
@@ -53,6 +60,8 @@ class Laser:
 		cls.image_surfaces_vertical[6] = world.scale(pygame.image.load("Images/Lasers/Vertical/7.png"))
 		cls.segment_width = int(floor(20 * world.scale_x))
 		cls.segment_height = int(floor(20 * world.scale_y))
+		cls.half_tile_width = world.tile_pixel_w // 2
+		cls.half_tile_height = world.tile_pixel_h // 2
 		cls.laser_sound = pygame.mixer.Sound("Audio/Good_Laser.wav")
 		
 	@classmethod
@@ -63,34 +72,102 @@ class Laser:
 			lsr = Laser.registry[lsr_index]
 			if not lsr.disperse:
 				lsr.automated_control()
+				lsr_index = lsr_index + 1
 			else:
 				del Laser.registry[lsr_index]
 				num_lasers = num_lasers - 1
-			lsr_index = lsr_index + 1
 		
 	def automated_control(self):
+	
 		if self.direction == 0:
 			if self.tile_x >= self.disperse_tile:
 				self.disperse = True
 				return
-			tile_check = self.tile_x
-			tile_max_extend = self.tile_x + 7
-			while tile_check < tile_max_extend:
-				tile_value = self.world.occupancy[self.tile_y][tile_check]
-				if isinstance(tile_value, robot.Robot) or tile_value == 3:
+			old_tile = self.tile_x
+			tile_max_extend = self.tile_x + 3
+			row_array = self.world.occupancy[self.tile_y]
+			len_row_array = len(row_array)
+			if tile_max_extend > len_row_array:
+				self.disperse = True
+				tile_max_extend = len_row_array
+			while self.tile_x < tile_max_extend:
+				tile_value = row_array[self.tile_x]
+				if isinstance(tile_value, robot.Robot):
+					tile_value.get_shot()
 					self.disperse = True
 					break
-					
-				tile_check = tile_check + 1
-			self.position_by_tile(self.tile_x, self.tile_y)
-			self.render_horizontal(tile_check - self.tile_x - 1)
-			self.tile_x = tile_check
+				elif tile_value == 9:
+					self.disperse = True
+					break
+				self.tile_x = self.tile_x + 1
+			self.position_x_by_tile(old_tile)
+			costume = self.tile_x - old_tile - 1
+			if costume >= 0:
+				self.render_horizontal(costume)
+			return
 			
-	def position_by_tile(self, tile_x, tile_y):
-		self.x = tile_x * self.world.tile_pixel_w
-		self.y = tile_y * self.world.tile_pixel_h
+		if self.direction == 1:
+			if self.tile_y >= self.disperse_tile:
+				self.disperse = True
+				return
+			old_tile = self.tile_y
+			tile_max_extend = self.tile_y + 3
+			num_rows = len(self.world.occupancy)
+			if tile_max_extend > num_rows:
+				self.disperse = True
+				tile_max_extend = num_rows
+			while self.tile_y < tile_max_extend:
+				tile_value = self.world.occupancy[self.tile_y][self.tile_x]
+				if isinstance(tile_value, robot.Robot):
+					tile_value.get_shot()
+					self.disperse = True
+					break
+				elif tile_value == 9:
+					self.disperse = True
+					break
+				self.tile_y = self.tile_y + 1
+			self.position_y_by_tile(old_tile)
+			costume = self.tile_y - old_tile - 1
+			if costume >= 0:
+				self.render_vertical(costume)
+			return
+			
+		if self.direction == 2:
+			if self.tile_x <= self.disperse_tile:
+				self.disperse = True
+				return
+			old_tile = self.tile_x
+			tile_max_extend = self.tile_x - 3
+			if tile_max_extend < 0:
+				self.disperse = True
+				tile_max_extend = 0
+			row_array = self.world.occupancy[self.tile_y]
+			while self.tile_x >= tile_max_extend:
+				tile_value = row_array[self.tile_x]
+				if isinstance(tile_value, robot.Robot):
+					tile_value.get_shot()
+					self.disperse = True
+					break
+				elif tile_value == 9:
+					self.disperse = True
+					break
+				self.tile_x = self.tile_x - 1
+			self.position_x_by_tile(self.tile_x + 1)
+			costume = old_tile - self.tile_x - 1
+			if costume >= 0:
+				self.render_horizontal(costume)
+			return
+			
+	def position_x_by_tile(self, tile_x):
+		self.x = tile_x * self.world.tile_pixel_w + self.x_offset
+	
+	def position_y_by_tile(self, tile_y):
+		self.y = tile_y * self.world.tile_pixel_h + self.y_offset
 			
 				
 	def render_horizontal(self, breadth):
 		self.world.screen.blit(Laser.image_surfaces_horizontal[breadth], (self.x - self.world.camera_x, self.y - self.world.camera_y))
+		
+	def render_vertical(self, breadth):
+		self.world.screen.blit(Laser.image_surfaces_vertical[breadth], (self.x - self.world.camera_x, self.y - self.world.camera_y))
 		

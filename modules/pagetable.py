@@ -30,15 +30,29 @@ class PageTable:
 			
 	def get_page(self, row, col):
 		try:
-			return self.table[row][col]
+			if row >= 0 and col >= 0:
+				return self.table[row][col]
+			else:
+				return None
 		except IndexError:
 			return None
 		
 	def set_page(self, row, col, lst = []):
 		self.table[row][col] = lst
 		
-	def remove_obj(self, row, col, index):
+	def remove_obj_by_indices(self, row, col, index):
 		del self.table[row][col][index]
+	
+	def remove_obj_by_ref(self, pageref, obj_to_del):
+		index = 0
+		num_indices = len(pageref)
+		while index < num_indices:
+			if pageref[index] == obj_to_del:
+				del pageref[index]
+				break
+			index = index + 1
 		
 	def add_obj(self, row, col, obj):
-		self.table[row][col].append(obj)
+		page_array = self.table[row][col]
+		page_array.append(obj)
+		return page_array

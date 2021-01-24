@@ -40,7 +40,15 @@ def render_page(pagetable, row, col):
 		return
 	except TypeError:
 		return
-
+		
+def process_page(pagetable, row, col):
+	try:
+		for robot in pagetable.get_page(row,col):
+			robot.automated_control()
+		return
+	except TypeError:
+		return
+		
 #####################################################
 #####################################################
 #####################################################
@@ -58,7 +66,7 @@ screen_width = displayInfo.current_w
 screen_height = displayInfo.current_h
 screen = None
 if config.FULLSCREEN:
-	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN, 8)
+	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 32)
 else:
 	screen = pygame.display.set_mode((576, 432), 0, 8)
 
@@ -83,7 +91,7 @@ checker_height = int(floor(144 * world.scale_y))
 checker = pygame.Surface((checker_width, checker_height))
 checker.fill((0,0,0))
 displayInfo = pygame.display.Info()
-checker_s = screen.copy()#pygame.Surface((int(displayInfo.current_w), int(displayInfo.current_h)))
+checker_s = screen.copy()
 checker_s.fill((255, 255, 255))
 
 #Create page table instance
@@ -100,12 +108,12 @@ title_frame = (60 * world.scale_x, 100 * world.scale_y)
 
 #Initialize the "Press Button" blinking boxes for the menus
 press_btn_box_surface = world.scale(pygame.image.load("Images/HUD/pressButton.png"))
-press_btn_box_frame = (200 * world.scale_x, 200 * world.scale_y)
+press_btn_box_frame = (int(floor(200 * world.scale_x)), int(floor(200 * world.scale_y)))
 
 press_btn2_box_surface = world.scale(pygame.image.load("Images/HUD/pressButton2.png"))
 press_btn2_fill_black = press_btn2_box_surface.copy()
 press_btn2_fill_black.fill((0,0,0))
-press_btn2_box_frame = (140 * world.scale_x, 310 * world.scale_y)
+press_btn2_box_frame = (int(floor(140 * world.scale_x)), int(floor(310 * world.scale_y)))
 
 #Initialize your robot
 #your_robot = Robot(world, pagetable, 0, 4, 11)
@@ -265,7 +273,7 @@ while True:
 				game_state = 2
 				break
 			if keys[pygame.K_SPACE]:
-				fps = 300
+				fps = 750
 			else:
 				fps = 14
 			
@@ -404,15 +412,30 @@ while True:
 			if keys[pygame.K_SPACE]:
 				if not fire_cooldown:
 					your_robot.fire()
-					fire_cooldown = 3
+					fire_cooldown = 5
 					
 			if fire_cooldown > 0:
 				fire_cooldown = fire_cooldown - 1
 				
-			your_robot.automated_control()
+			
 			your_robot.calc_page()
+			#Process pages around your_robot
+			process_page(pagetable, your_robot.page_row-1, your_robot.page_col-1)
+			process_page(pagetable, your_robot.page_row, your_robot.page_col-1)
+			process_page(pagetable, your_robot.page_row+1, your_robot.page_col-1)
+			process_page(pagetable, your_robot.page_row-1, your_robot.page_col)
+			process_page(pagetable, your_robot.page_row, your_robot.page_col)
+			process_page(pagetable, your_robot.page_row+1, your_robot.page_col)
+			process_page(pagetable, your_robot.page_row-1, your_robot.page_col+1)
+			process_page(pagetable, your_robot.page_row, your_robot.page_col+1)
+			process_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
+			
+			#Render the background
+			
 			world.focus_camera(your_robot)
 			world.render()
+			
+			#Render lasers
 			Laser.process_all_lasers()
 			
 			#Render pages around your_robot
@@ -427,8 +450,5 @@ while True:
 			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
 			
 			pygame.display.flip()
-			clock.tick(30)
-			
-			
-			
+			clock.tick_busy_loop(30)
 			
