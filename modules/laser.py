@@ -158,6 +158,31 @@ class Laser:
 				self.render_horizontal(costume)
 			return
 			
+		if self.direction == 3:
+			if self.tile_y <= self.disperse_tile:
+				self.disperse = True
+				return
+			old_tile = self.tile_y
+			tile_max_extend = self.tile_y - 3
+			if tile_max_extend < 0:
+				self.disperse = True
+				tile_max_extend = 0
+			while self.tile_y >= tile_max_extend:
+				tile_value = self.world.occupancy[self.tile_y][self.tile_x]
+				if isinstance(tile_value, robot.Robot):
+					tile_value.get_shot()
+					self.disperse = True
+					break
+				elif tile_value == 9:
+					self.disperse = True
+					break
+				self.tile_y = self.tile_y - 1
+			self.position_y_by_tile(self.tile_y + 1)
+			costume = old_tile - self.tile_y - 1
+			if costume >= 0:
+				self.render_vertical(costume)
+			return
+			
 	def position_x_by_tile(self, tile_x):
 		self.x = tile_x * self.world.tile_pixel_w + self.x_offset
 	

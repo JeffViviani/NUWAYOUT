@@ -179,7 +179,7 @@ while True:
 		pygame.mixer.music.play(-1)
 		
 		#Generate all robots
-		load_robots(world, pagetable, "data/robots1.txt")
+		load_robots(world, pagetable, "data/robots0.txt")
 		
 		while game_state == 0:
 			for event in pygame.event.get():
