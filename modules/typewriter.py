@@ -54,7 +54,7 @@ class Typewriter:
 		self.cursor_x = Typewriter.letter_width
 		self.cursor_y = self.cursor_y + Typewriter.letter_height + Typewriter.letter_spacing * 2
 	
-	def print(self, char):
+	def type(self, char):
 		if char == '\r':
 			return
 		if char == '\n':
@@ -69,8 +69,8 @@ class Typewriter:
 	def can_fit(self, word):
 		return self.cursor_x + Typewriter.letter_width * len(word) < self.world.displayInfo.current_w
 			
-	def print_word(self, word):
+	def type_word(self, word):
 		if not self.can_fit(word):
 			self.newline()
 		for c in word:
-			self.print(c)
+			self.type(c)

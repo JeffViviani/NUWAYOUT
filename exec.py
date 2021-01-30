@@ -66,7 +66,7 @@ screen_width = displayInfo.current_w
 screen_height = displayInfo.current_h
 screen = None
 if config.FULLSCREEN:
-	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 32)
+	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 8)
 else:
 	screen = pygame.display.set_mode((576, 432), 0, 8)
 
@@ -298,7 +298,7 @@ while True:
 						eof = True
 						end_marker = True
 						
-			typewriter.print(char_buffer[0])
+			typewriter.type(char_buffer[0])
 			if len(char_buffer) > 0:
 				char_buffer = char_buffer[1:]
 			if eof and len(char_buffer) == 0:

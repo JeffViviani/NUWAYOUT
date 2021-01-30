@@ -3,8 +3,8 @@ from copy import deepcopy
 import pygame
 from filestream import *
 
-GAME_NATIVE_W = 576
-GAME_NATIVE_H = 432
+GAME_NATIVE_W = 576.0
+GAME_NATIVE_H = 432.0
 
 class World:
 	def __init__(self, screen):
