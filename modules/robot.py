@@ -1,4 +1,5 @@
 import pygame
+import random
 from world import *
 from laser import *
 from pagetable import *
@@ -9,11 +10,13 @@ class Robot:
 	image_surfaces = [None]*15
 	id_counter = 0
 	def __init__(self, world, pagetable, type, tile_x_init, tile_y_init):
+		self.ai = True
 		self.world = world
 		self.pagetable = pagetable
 		self.type = type
 		self.base_costume = (type - 1) * 5
 		self.costume = self.base_costume
+		self.target = None
 		self.tile_x = tile_x_init
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
@@ -93,7 +96,16 @@ class Robot:
 				self.flicker_state = 1
 			else:
 				self.flicker_state = 0
-		#If in process of moving rightward
+				
+		#If a computer controlled robot
+		if self.ai:
+			#Basic looking in different directions
+			if random.randint(0,50) == 0:
+				new_dir = random.randint(0,3)
+				self.direction = new_dir
+				self.costume = self.base_costume + new_dir
+				
+		#If in process of moving
 		if self.control_state == 1:
 			self.movement_progress = self.movement_progress + 1
 			if self.movement_progress == 4:
@@ -138,6 +150,17 @@ class Robot:
 	def calc_page_col(self):
 		self.page_col = int(floor(self.tile_x / PAGETABLE_N))
 		
+	def find_target(self, type):
+		#Scan your page and any nearby pages for a potential target of type 'type'.
+		pages_to_check = []
+		pages_to_check.append(self.my_page)
+		x_mod = self.tile_x % PAGETABLE_N
+		y_mod = self.tile_y & PAGETABLE_N
+		if x_mod >= HALF_PAGETABLE_N - ONETHIRD_PAGETABLE_N:
+			if y_mod >= PAGETABLE_N - ONETHIRD_PAGETABLE_N:
+				pages_to_check.append(self.pagetable.
+				#LEFT OFF HERE
+		
 	def fire(self):
 		Laser(self.world, self)
 		
@@ -157,13 +180,28 @@ class Robot:
 	def render(self):
 		if self.flicker_state == 0:
 			self.world.screen.blit(Robot.image_surfaces[self.costume], (self.x - self.world.camera_x, self.y - self.world.camera_y))
+			
+	def point_right(self):
+		self.direction = 0
+		self.costume = self.base_costume + 0
+		
+	def point_down(self):
+		self.direction = 1
+		self.costume = self.base_costume + 1
+		
+	def point_left(self):
+		self.direction = 2
+		self.costume = self.base_costume + 2
+		
+	def point_up(self):
+		self.direction = 3
+		self.costume = self.base_costume + 3
 	
 	#If capable, initiate rightward movement
 	def try_move_right(self):
 		if self.control_state == 0:
 			#Point in direction
-			self.direction = 0
-			self.costume = self.base_costume + 0
+			self.point_right()
 			#If free to move
 			try:
 				if self.world.occupancy[self.tile_y][self.tile_x + 1] == 0:
@@ -181,8 +219,7 @@ class Robot:
 	def try_move_down(self):
 		if self.control_state == 0:
 			#Point in direction
-			self.direction = 1
-			self.costume = self.base_costume + 1
+			self.point_down()
 			#If free to move
 			try:
 				if self.world.occupancy[self.tile_y + 1][self.tile_x] == 0:
@@ -201,8 +238,7 @@ class Robot:
 	def try_move_left(self):
 		if self.control_state == 0:
 			#Point in direction
-			self.direction = 2
-			self.costume = self.base_costume + 2
+			self.point_left()
 			#If free to move
 			try:
 				if self.tile_x >= 1 and self.world.occupancy[self.tile_y][self.tile_x - 1] == 0:
@@ -221,8 +257,7 @@ class Robot:
 	def try_move_up(self):
 		if self.control_state == 0:
 			#Point in direction
-			self.direction = 3
-			self.costume = self.base_costume + 3
+			self.point_up()
 			#If free to move
 			try:
 				if self.tile_y >= 1 and self.world.occupancy[self.tile_y - 1][self.tile_x] == 0:

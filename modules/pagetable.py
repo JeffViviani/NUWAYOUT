@@ -1,6 +1,7 @@
 from math import ceil
 import world
 PAGETABLE_N = 30
+ONETHIRD_PAGETABLE_N = PAGETABLE_N / 3
 
 class PageTable:
 	def __init__(self):

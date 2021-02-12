@@ -388,6 +388,7 @@ while True:
 		world.load_world("data/world" + str(level) + ".txt")
 		pagetable.load_blank(world)
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
+		your_robot.ai = False
 		fire_cooldown = 0
 		
 		while game_state == 4:
