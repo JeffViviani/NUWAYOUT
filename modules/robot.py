@@ -3,6 +3,7 @@ import random
 from world import *
 from laser import *
 from pagetable import *
+from pathfinder import *
 from math import floor
 
 class Robot:
@@ -17,6 +18,8 @@ class Robot:
 		self.base_costume = (type - 1) * 5
 		self.costume = self.base_costume
 		self.target = None
+		self.path = None
+		self.personality = 0
 		self.tile_x = tile_x_init
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
@@ -38,6 +41,7 @@ class Robot:
 		self.dest_x = None
 		self.dest_y = None
 		self.diminish = 0
+		self.tick = 0
 		Robot.id_counter = Robot.id_counter + 1
 		
 	
@@ -97,13 +101,103 @@ class Robot:
 			else:
 				self.flicker_state = 0
 				
-		#If a computer controlled robot
-		if self.ai:
-			#Basic looking in different directions
-			if random.randint(0,50) == 0:
-				new_dir = random.randint(0,3)
-				self.direction = new_dir
-				self.costume = self.base_costume + new_dir
+		# If a computer controlled robot
+		#
+		# ROBOT AI FUNCTIONALITY FULL DESCRIPTION
+		# The AI for the robots is state oriented. There are higher order states and lower order
+		# states for each of the higher order states. They are designed to represent similar
+		# behavior to that of a real thought process.
+		#
+		# BASIC PERSONALITY
+		# This is just the typical robot that tried to attack when it sees an enemy at mid-range. It will
+		# not go to any extremes of the other personalities but is well-rounded.
+		#
+		# AGGRESSIVE PERSONALITY
+		# These robots are more likely to charge head-on at their opponents. They will be less prudent
+		# when weilding their weapons, so they certainly risk accidentally shooting a teammate.
+		#
+		# When choosing a target, an aggressive robot does not choose the most convenient opponent. It
+		# may lock onto one specific opponent for no undersdtandable reason other than it feels like
+		# going after that one. If one opponent has been particularly successful or appears to be quite
+		# strong, it may be more likely to target that one.
+		#
+		# Of course, if anything gets too close to an aggressive robot, it is bound to take its eyes off
+		# its target to target the nearby opponent.
+		#
+		# STEALTH PERSONALITY
+		# These robots will usually try to attack from a distance or work their away around to try to get
+		# an opponent from behind or the side. They can still handle close encounters but are more skillful
+		# at range. When choosing a target, it is fairly random. How they go about hunting that target is discreetly.
+		#
+		# NERVOUS PERSONALITY
+		# These robots are likely to run away when they encounter danger until they find a group of allies that
+		# they can cluster to. They are less likely to even choose a target but are rather focuses on
+		# self-preservation.
+		#
+		# WATCHGUARD PERSONALITY
+		# These robots are most interesting in guarding an ear, particularly the area around which they spawn.
+		# They may move a bit here and there but mostly hang out in one area.
+		#
+		# TRIBAL PERSONALITY
+		# These robots seek out allies to hang out with. They may follow another robot as following a leader.
+		# They may also go after the very robot who the followee is going after to double team.
+		#
+		# The personalities are permanent. For each personality then there are higher order states and lower
+		# order states.
+		if self.control_state == 0:
+			if self.ai:
+				personality = self.personality
+				
+				#BASIC PERSONALITY
+				if personality == 0:
+					#NO TARGET STATE
+					if self.target == None:
+						self.target = self.find_target(1, 0)
+					#HAS A TARGET STATE
+					else:
+						#Empty path currently
+						if self.path == None:
+							if self.tick == 0:
+								i = random.randint(0,31)
+								if i < 4:
+									#Hunt down robot
+									pfind = PathFinder(self.world)
+									self.path = pfind.find_path(self.tile_x, self.tile_y,
+									                            self.target.tile_x,
+													            self.target.tile_y, 20)
+									self.path_index = len(self.path)
+									
+							#Face general direction of robot
+							off_x = self.tile_x - self.target.tile_x
+							off_y = self.tile_y - self.target.tile_y
+							if abs(off_x) >= abs(off_y):
+								if off_x > 0:
+									self.direction = 2
+									self.costume = self.base_costume + 2
+								else:
+									self.direction = 0
+									self.costume = self.base_costume + 0
+							else:
+								if off_y > 0:
+									self.direction = 3
+									self.costume = self.base_costume + 3
+								else:
+									self.direction = 1
+									self.costume = self.base_costume + 1
+						else:
+							#Follow path:
+							self.try_move_dir(self.path[self.path_index])
+							self.path_index = self.path_index - 1
+							if self.path_index == 0:
+								self.path = None
+							
+			
+			
+				#Basic looking in different directions
+				#if random.randint(0,50) == 0:
+					#new_dir = random.randint(0,3)
+					#self.direction = new_dir
+					#self.costume = self.base_costume + new_dir
 				
 		#If in process of moving
 		if self.control_state == 1:
@@ -114,7 +208,7 @@ class Robot:
 			else:
 				self.x = self.x + Robot.step_size_x
 			return
-		if self.control_state == 2:
+		elif self.control_state == 2:
 			self.movement_progress = self.movement_progress + 1
 			if self.movement_progress == 4:
 				self.y = self.dest_y
@@ -122,7 +216,7 @@ class Robot:
 			else:
 				self.y = self.y + Robot.step_size_y
 			return
-		if self.control_state == 3:
+		elif self.control_state == 3:
 			self.movement_progress = self.movement_progress + 1
 			if self.movement_progress == 4:
 				self.x = self.dest_x
@@ -130,7 +224,7 @@ class Robot:
 			else:
 				self.x = self.x - Robot.step_size_x
 			return
-		if self.control_state == 4:
+		elif self.control_state == 4:
 			self.movement_progress = self.movement_progress + 1
 			if self.movement_progress == 4:
 				self.y = self.dest_y
@@ -150,17 +244,25 @@ class Robot:
 	def calc_page_col(self):
 		self.page_col = int(floor(self.tile_x / PAGETABLE_N))
 		
-	def find_target(self, type):
+	def find_target(self, type, criteria):
 		#Scan your page and any nearby pages for a potential target of type 'type'.
 		pages_to_check = []
-		pages_to_check.append(self.my_page)
-		x_mod = self.tile_x % PAGETABLE_N
-		y_mod = self.tile_y & PAGETABLE_N
-		if x_mod >= HALF_PAGETABLE_N - ONETHIRD_PAGETABLE_N:
-			if y_mod >= PAGETABLE_N - ONETHIRD_PAGETABLE_N:
-				pages_to_check.append(self.pagetable.
-				#LEFT OFF HERE
-		
+		self.pagetable.assemble_nearby_pages(self, pages_to_check)
+		#Iterate over all robots in the pages and pick one based on the criteria
+		#NEAREST
+		if criteria == 0:
+			pTarget = None
+			min_distance = 100
+			for page in pages_to_check:
+				print (page)
+				for obj in page:
+					if obj.type == type:
+						distance = abs(self.tile_x - obj.tile_x) + abs(self.tile_y - obj.tile_y)
+						if distance < min_distance:
+							min_distance = distance
+							pTarget = obj
+			return pTarget
+	
 	def fire(self):
 		Laser(self.world, self)
 		
@@ -196,6 +298,16 @@ class Robot:
 	def point_up(self):
 		self.direction = 3
 		self.costume = self.base_costume + 3
+		
+	def try_move_dir(self, dir):
+		if dir == 0:
+			self.try_move_right()
+		elif dir == 1:
+			self.try_move_down()
+		elif dir == 2:
+			self.try_move_left()
+		elif dir == 3:
+			self.try_move_up()
 	
 	#If capable, initiate rightward movement
 	def try_move_right(self):

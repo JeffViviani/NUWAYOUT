@@ -1,3 +1,11 @@
+
+# ABIVE LINE LEFT BLANK INTENTIONALLY
+################################################################################
+# FILE: exec.py
+# DESCRIPTION: The main runtime file for NUWAYOUT. Run this file from the
+# command line to run the game.
+################################################################################
+
 import sys
 sys.path.insert(1, 'modules/')
 
@@ -11,59 +19,104 @@ from pagetable import *
 from typewriter import *
 from math import floor
 
-#####################################################
-#####################################################
-#####################################################
-##################  FUNCTIONS #######################
-#####################################################
-#####################################################
-#####################################################
 
+################################################################################
+#################################  FUNCTIONS  ##################################
+################################################################################
+
+# NAME: load_robots
+# DESCRIPTION: Loads all of the robots from a text file 'file' into the world
+#   'world' and PageTable 'pagetable'.
+# REQUIREMENTS: 'world' must be an object of type World. 'pagetable' must be an
+#   object of type PageTable. 'file' must be a string that represents the file
+#   location of a text file. The text file must be formatted in a specific
+#   manner. The text file must consist of blocks of data. A block of data is
+#   three integers. These integers must be separated by Crlf. One block
+#   represents a single robot's spawn information. It is arranged as such:
+#
+#   type
+#   tile_x
+#   tile_y
+#
+#   Where 'type' is the type of robot, and 'tile_x' and 'tile_y' are its spawn
+#   coordinates. For example, considering a text file as so:
+#
+#   0
+#   10
+#   10
+#   1
+#   120
+#   77
+#
+#   The above text file would generate two robots. One of type "0" at coordinate
+#   (10, 10), and the other of type '1' at coordinate (120, 77).
+#
+# ALTERS: Both 'world' and 'pagetable' are altered. 'world.occupancy' is updated
+#   to include the new robots. 'pagetable' is updated to include the new robots
+#   in its pages.
+# RETURNS: Returns the first Robot from the text file.
 def load_robots(world, pagetable, file):
-	enemy_list = file_to_1D_list(file)
-	num_items = len(enemy_list)
+	robot_list = file_to_1D_list(file)
+	num_items = len(robot_list)
 	item = 0
 	first = 0
 	firstRef = None
 	while item < num_items:
-		new_robot = Robot(world, pagetable, enemy_list[item], enemy_list[item + 1], enemy_list[item + 2])
+		new_robot = Robot(world, pagetable, robot_list[item],
+		                  robot_list[item + 1], robot_list[item + 2])
 		item = item + 3
 		if first == 0:
 			first = 1
 			firstRef = new_robot
 	return firstRef
-		
-def render_page(pagetable, row, col):
+
+# NAME: render_page
+# DESCRIPTION: Renders all of the Robots from the page inside the 'pagetable'
+#   specified by 'page_row' and 'page_col' to the screen.
+# REQUIREMENTS: 'pagetable' must be an object of type PageTable. 'page_row' and
+#   'page_col' must be integers. All objects inside of the page must be Robot
+#   objects.
+# ALTERS: Nothing
+# RETURNS: Nothing
+def render_page(pagetable, page_row, page_col):
 	try:
-		for robot in pagetable.get_page(row,col):
+		for robot in pagetable.get_page(page_row, page_col):
 			robot.render()
 		return
 	except TypeError:
 		return
-		
-def process_page(pagetable, row, col):
+
+# NAME: process_page
+# DESCRIPTION: Runs method 'automated_control()' on every Robot inside the
+# 'pagetable' specified by 'page_row' and 'page_col'.
+# REQUIREMENTS: 'pagetable' must be an object of type PageTable. 'page_row' and
+#   'page_col' must be integers. All objects inside of the page must be Robot
+#   objects.
+# ALTERS: 'pagetable' may be altered by the Robot 'automated_control()' method.
+# RETURNS: Nothing
+def process_page(pagetable, page_row, page_col):
 	try:
-		for robot in pagetable.get_page(row,col):
+		for robot in pagetable.get_page(page_row, page_col):
 			robot.automated_control()
 		return
 	except TypeError:
 		return
 		
-#####################################################
-#####################################################
-#####################################################
-################  INITIALIZATION ####################
-#####################################################
-#####################################################
-#####################################################
+
+################################################################################
+#############################  INITIALIZATION ##################################
+################################################################################
+
 
 #Initialize pygame and the display
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
+
 displayInfo = pygame.display.Info()
 screen_width = displayInfo.current_w
 screen_height = displayInfo.current_h
+
 screen = None
 if config.FULLSCREEN:
 	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 8)

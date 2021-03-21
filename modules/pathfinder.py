@@ -89,9 +89,8 @@ class PathNode:
 				self.y = previousNode.y - 1
 			self.g = previousNode.g + 1
 			self.calc_f()
-			if self.path.node_arr
-			if self.f < self.path.node_arr[self.off_tile_x][self.odd_tile_y]:
-				self.path.node_arr[self.off_tile_x][self.off_tile_y] = self.f
+			if self.f < self.path.node_arr[self.off_tile_x_dest][self.off_tile_y_dest]:
+				self.path.node_arr[self.off_tile_x_dest][self.off_tile_y_dest] = self.f
 				if self.off_tile_x
 			
 	def calc_f(self):
