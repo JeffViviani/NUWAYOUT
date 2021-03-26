@@ -161,11 +161,13 @@ class Robot:
 								i = random.randint(0,31)
 								if i < 4:
 									#Hunt down robot
-									pfind = PathFinder(self.world)
-									self.path = pfind.find_path(self.tile_x, self.tile_y,
-									                            self.target.tile_x,
-													            self.target.tile_y, 20)
-									self.path_index = len(self.path)
+									pfind = Pathfinder(self.world)
+									self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y, 20)
+									#print("Path Found:")
+									#print(self.path)
+									self.path_index = len(self.path) - 1
+									if self.path_index == -1:
+										self.path = None
 									
 							#Face general direction of robot
 							off_x = self.tile_x - self.target.tile_x
@@ -186,6 +188,8 @@ class Robot:
 									self.costume = self.base_costume + 1
 						else:
 							#Follow path:
+							print("Path index:")
+							print(self.path_index)
 							self.try_move_dir(self.path[self.path_index])
 							self.path_index = self.path_index - 1
 							if self.path_index == 0:
@@ -254,13 +258,14 @@ class Robot:
 			pTarget = None
 			min_distance = 100
 			for page in pages_to_check:
-				print (page)
 				for obj in page:
 					if obj.type == type:
 						distance = abs(self.tile_x - obj.tile_x) + abs(self.tile_y - obj.tile_y)
 						if distance < min_distance:
 							min_distance = distance
 							pTarget = obj
+			if pTarget !=None:
+				print("Found target!!")
 			return pTarget
 	
 	def fire(self):

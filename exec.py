@@ -119,9 +119,9 @@ screen_height = displayInfo.current_h
 
 screen = None
 if config.FULLSCREEN:
-	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 8)
+	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 32)
 else:
-	screen = pygame.display.set_mode((576, 432), 0, 8)
+	screen = pygame.display.set_mode((576, 432), 0, 32)
 
 #Load the main menu world
 world = World(screen)
@@ -441,6 +441,7 @@ while True:
 		world.load_world("data/world" + str(level) + ".txt")
 		pagetable.load_blank(world)
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
+		print("YOUR ROBOT ID: " + str(hex(id(your_robot))))
 		your_robot.ai = False
 		fire_cooldown = 0
 		

@@ -8,42 +8,44 @@
 class Pathfinder:
 	def __init__(self, world):
 		self.world = world
-		self.nodeQueue = PriorityQueue()
+		self.nodeQueue = OrderedList()
 	
 	#A* search algorithm
 	def find_path(self, tile_x_orig, tile_y_orig, tile_x_dest, tile_y_dest, max_dist):
+		print("NEW PATHFIND...")
 		self.tile_x_orig = tile_x_orig
 		self.tile_y_orig = tile_y_orig
 		self.tile_x_dest = tile_x_dest
 		self.tile_y_dest = tile_y_dest
+		print("Go from (" + str(tile_x_orig) + "," + str(tile_y_orig) + ") to (" + str(tile_x_dest) + "," + str(tile_y_dest) + ")")
 		self.off_tile_x_dest = self.tile_x_dest - self.tile_x_orig
 		self.off_tile_y_dest = self.tile_y_dest - self.tile_y_orig
 		self.max_dist = max_dist
 		tile_queue = OrderedList()
 		double_max_dist = max_dist + max_dist
 		#Generate the open list. The size is determined by `max_dist`.
-		self.node_arr = [[None for i in range(double_max_dist)] for j in range(double_max_dist)]
+		self.node_arr = [[100 for i in range(double_max_dist)] for j in range(double_max_dist)]
 		#Generate the starting node
 		nxtup = PathNode(None, None, self)
-		nxtup.tile_x = tile_x_orig
-		nxtup.tile_y = tile_y_orig
-		nxtup.calc_f(tile_x_dest, tile_y_dest)
-		self.node_arr[0][0] = nxtup
-		tile_queue.put(nxtup)
+		self.node_arr[0][0] = nxtup.f
+		tile_queue.add(nxtup)
 		
-		final_node = None
+		self.final_node = None
 		
 		calculated_path = []
 		#Generate successors to starting tile and continue process until destination is reached
 		
 		while not tile_queue.empty():
+			print("Queue size before pop'n'branch:" + str(tile_queue.size))
+			nxtup = tile_queue.pop()
 			tile_queue.add(nxtup.sprout_right())
 			tile_queue.add(nxtup.sprout_down())
 			tile_queue.add(nxtup.sprout_left())
 			tile_queue.add(nxtup.sprout_up())
-			if final_node != None:
+			print("Queue size after adding:" + str(tile_queue.size))
+			if self.final_node != None:
 				#Backtrack from the final node to calculate the path
-				node = final_node
+				node = self.final_node
 				while node.previousNode != None:
 					calculated_path.insert(0, node.direction)
 					node = node.previousNode
@@ -59,6 +61,7 @@ class Pathfinder:
 #     found.
 class PathNode:
 	def __init__(self, previousNode, direction, path=None):
+		self.valid = False
 		if previousNode == None:
 			self.previousNode = None
 			self.direction = None
@@ -71,53 +74,71 @@ class PathNode:
 			self.off_tile_y = 0
 			self.g = 0
 			self.calc_f()
+			self.valid = True
 		else:
 			self.previousNode = previousNode
 			self.direction = direction
 			self.path = self.previousNode.path
 			if self.direction == 0:
-				self.x = previousNode.x + 1
-				self.y = previousNode.y
+				self.off_tile_x = previousNode.off_tile_x + 1
+				self.off_tile_y = previousNode.off_tile_y
 			elif self.direction == 1:
-				self.x = previousNode.x
-				self.y = previousNode.y + 1
+				self.off_tile_x = previousNode.off_tile_x
+				self.off_tile_y = previousNode.off_tile_y + 1
 			elif self.direction == 2:
-				self.x = previousNode.x - 1
-				self.y = previousNode.y
+				self.off_tile_x = previousNode.off_tile_x - 1
+				self.off_tile_y = previousNode.off_tile_y
 			elif self.direction == 3:
-				self.x = previousNode.x
-				self.y = previousNode.y - 1
+				self.off_tile_x = previousNode.off_tile_x
+				self.off_tile_y = previousNode.off_tile_y - 1
 			self.g = previousNode.g + 1
 			self.calc_f()
-			if self.f < self.path.node_arr[self.off_tile_x_dest][self.off_tile_y_dest]:
-				self.path.node_arr[self.off_tile_x_dest][self.off_tile_y_dest] = self.f
-				if self.off_tile_x
+			if self.f < self.path.node_arr[self.off_tile_y][self.off_tile_x]:
+				tmp = self.path.max_dist
+				if abs(self.off_tile_x) < tmp and abs(self.off_tile_y) < tmp:
+					self.path.node_arr[self.off_tile_y][self.off_tile_x] = self.f
+					self.valid = True
+					if self.off_tile_x == self.path.off_tile_x_dest and self.off_tile_y == self.path.off_tile_y_dest:
+						print("DEST FOUND!!")
+						self.path.final_node = self
 			
 	def calc_f(self):
-		self.f = self.g + abs(self.path.tile_x_dest - self.tile_x) + abs(self.path.tile_y_dest - self.tile_y)
+		self.f = self.g + abs(self.path.off_tile_x_dest - self.off_tile_x) + abs(self.path.off_tile_y_dest - self.off_tile_y)
 			
 	def sprout_right(self):
-		if self.path.world.occupancy[self.path.tile_x_orig + self.off_tile_x + 1][self.path.orig_tile_y + self.off_tile_y] == 0 and self.off_tile_x <= self.path.max_dist
-			return PathNode(self, 0)
-		else:
+		try:
+			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y][self.path.tile_x_orig + self.off_tile_x + 1] == 0:
+				return PathNode(self, 0)
+			else:
+				return None
+		except IndexError:
 			return None
 		
 	def sprout_down(self):
-		if self.path.world.occupancy[self.path.tile_x_orig + self.off_tile_x][self.path.orig_tile_y + self.off_tile_y + 1] == 0
-			return PathNode(self, 1)
-		else:
+		try:
+			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y + 1][self.path.tile_x_orig + self.off_tile_x] == 0:
+				return PathNode(self, 1)
+			else:
+				return None
+		except IndexError:
 			return None
 		
 	def sprout_left(self):
-		if self.path.world.occupancy[self.path.tile_x_orig + self.off_tile_x - 1][self.path.orig_tile_y + self.off_tile_y] == 0
-			return PathNode(self, 2)
-		else:
+		try:
+			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y][self.path.tile_x_orig + self.off_tile_x - 1] == 0:
+				return PathNode(self, 2)
+			else:
+				return None
+		except IndexError:
 			return None
 	
 	def sprout_up(self):
-		if self.path.world.occupancy[self.path.tile_x_orig + self.off_tile_x][self.path.orig_tile_y + self.off_tile_y - 1] == 0
-			return PathNode(self, 3)
-		else:
+		try:
+			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y - 1][self.path.tile_x_orig + self.off_tile_x] == 0:
+				return PathNode(self, 3)
+			else:
+				return None
+		except IndexError:
 			return None
 
 #Class that acts as a custom implemented priority queue, with the priority favoring the node
@@ -125,7 +146,8 @@ class PathNode:
 class OrderedList:
 	#index 0 is a value that is half of 0, index 1 is a value that is half of 1, etc.
 	#Because division in hardware is inefficient, this is a more efficient process.
-	half_size = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]
+	half_size = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23,
+	                24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 30, 30, 31, 31]
 
 	def __init__(self):
 		#The highest element (rightmost) in a list is in the front of the virtual queue. This is more efficient for popping than
@@ -135,21 +157,23 @@ class OrderedList:
 	
 	def add(self, node):
 		if node != None:
-			f = node.f
-			half_size = OrderedList.half_size[self.size]
-			span = self.size
-			index = half_size
-			while span > 0:
-				span = OrderedList.half_span[span]
-				if f >= self.lst[index].f:
-					index = index + OrderedList.half_size[span]
-				else:
-					index = index - OrderedList.half_size[span]
-			self.lst.insert(index, node)
-			self.size = self.size + 1
+			if node.valid == True:
+				f = node.f
+				half_size = self.size // 2#OrderedList.half_size[self.size]
+				span = self.size
+				index = half_size
+				while span > 0:
+					span = span // 2#OrderedList.half_size[span]
+					if f >= self.lst[index].f:
+						index = index + (span // 2)#OrderedList.half_size[span]
+					else:
+						index = index - (span // 2)#OrderedList.half_size[span]
+				self.lst.insert(index, node)
+				self.size = self.size + 1
 	
 	def pop(self):
+		self.size = self.size - 1
 		return self.lst.pop(self.size - 1)
 		
-	def empty(self);
-		return (size == 0)
+	def empty(self):
+		return (self.size == 0)

@@ -9,7 +9,7 @@ class PageTable:
 		self.num_indices = None
 		self.num_sub_indices = None
 		
-	# Takes an object 'obj' and used its member variables to compile a list of pointers to pages
+	# Takes an object 'obj' and uses its member variables to compile a list of pointers to pages
 	# that are nearby to the coordinate ('tile_x','tile_y'). If the coordinate is in the center of
 	# the page, then the list will only include the page itself that the coordinate is within. If
 	# the tile is within one-third a page from any edge, those pages can be included, too.
