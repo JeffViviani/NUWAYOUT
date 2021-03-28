@@ -12,7 +12,6 @@ class Pathfinder:
 	
 	#A* search algorithm
 	def find_path(self, tile_x_orig, tile_y_orig, tile_x_dest, tile_y_dest, max_dist):
-		print("NEW PATHFIND...")
 		self.tile_x_orig = tile_x_orig
 		self.tile_y_orig = tile_y_orig
 		self.tile_x_dest = tile_x_dest
@@ -24,10 +23,9 @@ class Pathfinder:
 		tile_queue = OrderedList()
 		double_max_dist = max_dist + max_dist
 		#Generate the open list. The size is determined by `max_dist`.
-		self.node_arr = [[100 for i in range(double_max_dist)] for j in range(double_max_dist)]
+		self.node_arr = [[None for i in range(double_max_dist + 1)] for j in range(double_max_dist + 1)]
 		#Generate the starting node
 		nxtup = PathNode(None, None, self)
-		self.node_arr[0][0] = nxtup.f
 		tile_queue.add(nxtup)
 		
 		self.final_node = None
@@ -36,13 +34,12 @@ class Pathfinder:
 		#Generate successors to starting tile and continue process until destination is reached
 		
 		while not tile_queue.empty():
-			print("Queue size before pop'n'branch:" + str(tile_queue.size))
 			nxtup = tile_queue.pop()
-			tile_queue.add(nxtup.sprout_right())
-			tile_queue.add(nxtup.sprout_down())
-			tile_queue.add(nxtup.sprout_left())
-			tile_queue.add(nxtup.sprout_up())
-			print("Queue size after adding:" + str(tile_queue.size))
+			if nxtup.valid:
+				tile_queue.add(nxtup.sprout_right())
+				tile_queue.add(nxtup.sprout_down())
+				tile_queue.add(nxtup.sprout_left())
+				tile_queue.add(nxtup.sprout_up())
 			if self.final_node != None:
 				#Backtrack from the final node to calculate the path
 				node = self.final_node
@@ -50,7 +47,7 @@ class Pathfinder:
 					calculated_path.insert(0, node.direction)
 					node = node.previousNode
 				break
-				
+		print(calculated_path)
 		return calculated_path
 		
 		
@@ -66,6 +63,7 @@ class PathNode:
 			self.previousNode = None
 			self.direction = None
 			self.path = path
+			self.path.node_arr[0][0] = self
 			#
 			# self.off_tile_x - Represents the x offset from the starting tile.
 			# self.off_tile_y - Represents the y offset from the starting tile.
@@ -91,23 +89,29 @@ class PathNode:
 			elif self.direction == 3:
 				self.off_tile_x = previousNode.off_tile_x
 				self.off_tile_y = previousNode.off_tile_y - 1
-			self.g = previousNode.g + 1
-			self.calc_f()
-			if self.f < self.path.node_arr[self.off_tile_y][self.off_tile_x]:
-				tmp = self.path.max_dist
-				if abs(self.off_tile_x) < tmp and abs(self.off_tile_y) < tmp:
-					self.path.node_arr[self.off_tile_y][self.off_tile_x] = self.f
+			tmp = self.path.max_dist
+			if abs(self.off_tile_x) <= tmp and abs(self.off_tile_y) <= tmp:
+				curHolder = self.path.node_arr[self.off_tile_y][self.off_tile_x]
+				self.g = previousNode.g + 1
+				self.calc_f()
+				if curHolder == None or self.f < curHolder.f:
+					if curHolder != None:
+						curHolder.valid = False
 					self.valid = True
+					self.path.node_arr[self.off_tile_y][self.off_tile_x] = self
 					if self.off_tile_x == self.path.off_tile_x_dest and self.off_tile_y == self.path.off_tile_y_dest:
-						print("DEST FOUND!!")
+						print("THIS IS THE DESTINATION!")
 						self.path.final_node = self
+					
 			
 	def calc_f(self):
 		self.f = self.g + abs(self.path.off_tile_x_dest - self.off_tile_x) + abs(self.path.off_tile_y_dest - self.off_tile_y)
 			
 	def sprout_right(self):
+		tentative_x_off = self.off_tile_x + 1
+		tentative_y_off = self.off_tile_y
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y][self.path.tile_x_orig + self.off_tile_x + 1] == 0:
+			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 0)
 			else:
 				return None
@@ -115,8 +119,10 @@ class PathNode:
 			return None
 		
 	def sprout_down(self):
+		tentative_x_off = self.off_tile_x
+		tentative_y_off = self.off_tile_y + 1
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y + 1][self.path.tile_x_orig + self.off_tile_x] == 0:
+			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 1)
 			else:
 				return None
@@ -124,8 +130,10 @@ class PathNode:
 			return None
 		
 	def sprout_left(self):
+		tentative_x_off = self.off_tile_x - 1
+		tentative_y_off = self.off_tile_y
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y][self.path.tile_x_orig + self.off_tile_x - 1] == 0:
+			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 2)
 			else:
 				return None
@@ -133,8 +141,10 @@ class PathNode:
 			return None
 	
 	def sprout_up(self):
+		tentative_x_off = self.off_tile_x
+		tentative_y_off = self.off_tile_y - 1
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + self.off_tile_y - 1][self.path.tile_x_orig + self.off_tile_x] == 0:
+			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 3)
 			else:
 				return None
@@ -173,7 +183,7 @@ class OrderedList:
 	
 	def pop(self):
 		self.size = self.size - 1
-		return self.lst.pop(self.size - 1)
+		return self.lst.pop(self.size)
 		
 	def empty(self):
 		return (self.size == 0)

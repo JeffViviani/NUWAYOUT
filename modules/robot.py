@@ -162,7 +162,7 @@ class Robot:
 								if i < 4:
 									#Hunt down robot
 									pfind = Pathfinder(self.world)
-									self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y, 20)
+									self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y, 6)
 									#print("Path Found:")
 									#print(self.path)
 									self.path_index = len(self.path) - 1
@@ -190,10 +190,14 @@ class Robot:
 							#Follow path:
 							print("Path index:")
 							print(self.path_index)
-							self.try_move_dir(self.path[self.path_index])
-							self.path_index = self.path_index - 1
-							if self.path_index == 0:
-								self.path = None
+							if self.control_state == 0:
+								self.try_move_dir(self.path[self.path_index])
+								if self.control_state != 0:
+									self.path_index = self.path_index - 1
+									if self.path_index == -1:
+										self.path = None
+								else:
+									self.path = None
 							
 			
 			
