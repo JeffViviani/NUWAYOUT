@@ -119,9 +119,9 @@ screen_height = displayInfo.current_h
 
 screen = None
 if config.FULLSCREEN:
-	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 32)
+	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 8)
 else:
-	screen = pygame.display.set_mode((576, 432), 0, 32)
+	screen = pygame.display.set_mode((576, 432), 0, 8)
 
 #Load the main menu world
 world = World(screen)
@@ -504,6 +504,34 @@ while True:
 			render_page(pagetable, your_robot.page_row, your_robot.page_col+1)
 			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
 			
+			if your_robot.diminish == 2:
+				#You lost!
+				game_state = 5
+				break
+			
 			pygame.display.flip()
 			clock.tick_busy_loop(30)
 			
+#####################################################
+#####################################################
+#####################################################
+##############    YOU LOST FLASH    #################
+#####################################################
+#####################################################
+#####################################################
+
+	if game_state == 5:
+		screen_save_image = screen.copy()
+		flash_state = 20
+		while game_state == 5:
+			if flash_state < 7:
+				if flash_state % 2 == 0:
+					screen.blit(screen_save_image, (0,0))
+					flash_state 
+				else:
+					screen.fill((255,255,255))
+			flash_state = flash_state - 1
+			if flash_state == 0:
+				game_state = 0
+			pygame.display.flip()
+			clock.tick_busy_loop(4)
