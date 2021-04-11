@@ -20,6 +20,8 @@ class Robot:
 		self.target = None
 		self.path = None
 		self.personality = 0
+		if self.personality == 0:
+			self.preferred_dist = random.randint(3,6)
 		self.tile_x = tile_x_init
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
@@ -109,7 +111,7 @@ class Robot:
 		# behavior to that of a real thought process.
 		#
 		# BASIC PERSONALITY
-		# This is just the typical robot that tried to attack when it sees an enemy at mid-range. It will
+		# This is just the typical robot that tries to attack when it sees an enemy at mid-range. It will
 		# not go to any extremes of the other personalities but is well-rounded.
 		#
 		# AGGRESSIVE PERSONALITY
@@ -153,21 +155,41 @@ class Robot:
 					#NO TARGET STATE
 					if self.target == None:
 						self.target = self.find_target(1, 0)
+						self.tick = 0
 					#HAS A TARGET STATE
 					else:
 						#Empty path currently
 						if self.path == None:
+							self.tick = self.tick - 1
+							if self.tick == -1:
+								if random.randint(0,2) == 0:
+									self.tick = random.randint(10,40)
+									if self.target_in_sight():
+											self.fire()
+								else:
+									self.tick = 0
 							if self.tick == 0:
-								i = random.randint(0,31)
-								if i < 4:
-									#Hunt down robot
-									pfind = Pathfinder(self.world)
-									self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y, 6)
-									#print("Path Found:")
-									#print(self.path)
-									self.path_index = len(self.path) - 1
-									if self.path_index == -1:
-										self.path = None
+								#Hunt down robot
+								pfind = Pathfinder(self.world)
+								x_off = self.target.tile_x - self.tile_x
+								y_off = self.target.tile_y - self.tile_y
+								if abs(x_off) > abs(y_off):
+									if x_off < 0:
+										self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x + self.preferred_dist, self.target.tile_y, 20)
+									else:
+										self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x - self.preferred_dist, self.target.tile_y, 20)
+								else:
+									if y_off < 0:
+										self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y + self.preferred_dist, 20)
+									else:
+										self.path = pfind.find_path(self.tile_x, self.tile_y, self.target.tile_x, self.target.tile_y - self.preferred_dist, 20)
+								#print("Path Found:")
+								#print(self.path)
+								self.path_index = 0
+								self.path_index_end = len(self.path)
+								self.reconsider_index = random.randint(2,6)
+								if self.path_index_end == 0:
+									self.path = None
 									
 							#Face general direction of robot
 							off_x = self.tile_x - self.target.tile_x
@@ -188,13 +210,13 @@ class Robot:
 									self.costume = self.base_costume + 1
 						else:
 							#Follow path:
-							print("Path index:")
-							print(self.path_index)
+							#print("Path index:")
+							#print(self.path_index)
 							if self.control_state == 0:
 								self.try_move_dir(self.path[self.path_index])
 								if self.control_state != 0:
-									self.path_index = self.path_index - 1
-									if self.path_index == -1:
+									self.path_index = self.path_index + 1
+									if self.path_index == self.reconsider_index or self.path_index == self.path_index_end:
 										self.path = None
 								else:
 									self.path = None
@@ -259,7 +281,7 @@ class Robot:
 		#Iterate over all robots in the pages and pick one based on the criteria
 		#NEAREST
 		if criteria == 0:
-			pTarget = None
+			pTarget = None #pTarget is potential target
 			min_distance = 100
 			for page in pages_to_check:
 				for obj in page:
@@ -268,7 +290,7 @@ class Robot:
 						if distance < min_distance:
 							min_distance = distance
 							pTarget = obj
-			if pTarget !=None:
+			if pTarget != None:
 				print("Found target!!")
 			return pTarget
 	
@@ -407,3 +429,47 @@ class Robot:
 		if self.page_col != old_page_col:
 			self.leave_page()
 			self.join_page()
+	
+#Precondition: Must have a target
+	def target_in_sight(self):
+		if self.direction == 0:
+			if self.target.tile_y == self.tile_y and self.target.tile_x > self.tile_x:
+				tile_x_check = self.tile_x
+				end = self.target.tile_x - 1
+				while tile_x_check < end:
+					tile_x_check = tile_x_check + 1
+					if self.world.occupancy[self.tile_y][tile_x_check] != 0:
+						return False
+				if tile_x_check == end:
+					return True
+		elif self.direction == 1:
+			if self.target.tile_x == self.tile_x and self.target.tile_y > self.tile_y:
+				tile_y_check = self.tile_y
+				end = self.target.tile_y - 1
+				while tile_y_check < end:
+					tile_y_check = tile_y_check + 1
+					if self.world.occupancy[tile_y_check][self.tile_x] != 0:
+						return False
+				if tile_y_check == end:
+					return True
+		elif self.direction == 2:
+			if self.target.tile_y == self.tile_y and self.target.tile_x < self.tile_x:
+				tile_x_check = self.tile_x
+				end = self.target.tile_x + 1
+				while tile_x_check > end:
+					tile_x_check = tile_x_check - 1
+					if self.world.occupancy[self.tile_y][tile_x_check] != 0:
+						return False
+				if tile_x_check == end:
+					return True
+		elif self.direction == 3:
+			if self.target.tile_x == self.tile_x and self.target.tile_y < self.tile_y:
+				tile_y_check = self.tile_y
+				end = self.target.tile_y + 1
+				while tile_y_check > end:
+					tile_y_check = tile_y_check - 1
+					if self.world.occupancy[tile_y_check][self.tile_x] != 0:
+						return False
+				if tile_y_check == end:
+					return True
+		return False

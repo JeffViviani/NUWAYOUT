@@ -16,14 +16,16 @@ class Pathfinder:
 		self.tile_y_orig = tile_y_orig
 		self.tile_x_dest = tile_x_dest
 		self.tile_y_dest = tile_y_dest
-		print("Go from (" + str(tile_x_orig) + "," + str(tile_y_orig) + ") to (" + str(tile_x_dest) + "," + str(tile_y_dest) + ")")
+		#if tile_x_orig == tile_x_dest and tile_y_orig == tile_y_dest:
+			#print("PATH MATCH ALREADY")
+		#print("Go from (" + str(tile_x_orig) + "," + str(tile_y_orig) + ") to (" + str(tile_x_dest) + "," + str(tile_y_dest) + ")")
 		self.off_tile_x_dest = self.tile_x_dest - self.tile_x_orig
 		self.off_tile_y_dest = self.tile_y_dest - self.tile_y_orig
 		self.max_dist = max_dist
 		tile_queue = OrderedList()
 		double_max_dist = max_dist + max_dist
 		#Generate the open list. The size is determined by `max_dist`.
-		self.node_arr = [[None for i in range(double_max_dist + 1)] for j in range(double_max_dist + 1)]
+		self.node_arr = [[None for i in range(double_max_dist + 1 )] for j in range(double_max_dist + 1)]
 		#Generate the starting node
 		nxtup = PathNode(None, None, self)
 		tile_queue.add(nxtup)
@@ -47,7 +49,9 @@ class Pathfinder:
 					calculated_path.insert(0, node.direction)
 					node = node.previousNode
 				break
-		print(calculated_path)
+		#print(calculated_path)
+		#if tile_x_orig == tile_x_dest and tile_y_orig == tile_y_dest:
+			#print(calculated_path)
 		return calculated_path
 		
 		
@@ -100,7 +104,6 @@ class PathNode:
 					self.valid = True
 					self.path.node_arr[self.off_tile_y][self.off_tile_x] = self
 					if self.off_tile_x == self.path.off_tile_x_dest and self.off_tile_y == self.path.off_tile_y_dest:
-						print("THIS IS THE DESTINATION!")
 						self.path.final_node = self
 					
 			
@@ -175,9 +178,9 @@ class OrderedList:
 				while span > 0:
 					span = span // 2#OrderedList.half_size[span]
 					if f >= self.lst[index].f:
-						index = index + (span // 2)#OrderedList.half_size[span]
-					else:
 						index = index - (span // 2)#OrderedList.half_size[span]
+					else:
+						index = index + (span // 2)#OrderedList.half_size[span]
 				self.lst.insert(index, node)
 				self.size = self.size + 1
 	
