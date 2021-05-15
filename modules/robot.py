@@ -436,7 +436,7 @@ class Robot:
 				end = self.target.tile_x - 1
 				while tile_x_check < end:
 					tile_x_check = tile_x_check + 1
-					if self.world.occupancy[self.tile_y][tile_x_check] != 0:
+					if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + tile_x_check] != 0:
 						return False
 				if tile_x_check == end:
 					return True
@@ -446,7 +446,7 @@ class Robot:
 				end = self.target.tile_y - 1
 				while tile_y_check < end:
 					tile_y_check = tile_y_check + 1
-					if self.world.occupancy[tile_y_check][self.tile_x] != 0:
+					if self.world.occupancy[tile_y_check * self.world.bgnd_tiles_width + self.tile_x] != 0:
 						return False
 				if tile_y_check == end:
 					return True
@@ -456,7 +456,7 @@ class Robot:
 				end = self.target.tile_x + 1
 				while tile_x_check > end:
 					tile_x_check = tile_x_check - 1
-					if self.world.occupancy[self.tile_y][tile_x_check] != 0:
+					if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + tile_x_check] != 0:
 						return False
 				if tile_x_check == end:
 					return True
@@ -466,7 +466,7 @@ class Robot:
 				end = self.target.tile_y + 1
 				while tile_y_check > end:
 					tile_y_check = tile_y_check - 1
-					if self.world.occupancy[tile_y_check][self.tile_x] != 0:
+					if self.world.occupancy[tile_y_check * self.world.bgnd_tiles_width + self.tile_x] != 0:
 						return False
 				if tile_y_check == end:
 					return True

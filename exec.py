@@ -231,7 +231,7 @@ while True:
 	level = 0
 	
 	if game_state == 0:
-		pygame.mixer.music.load("Audio/Hyperloop-Deluxe.mp3")
+		pygame.mixer.music.load("Audio/WarpSpeed.wav")
 		pygame.mixer.music.play(-1)
 		
 		#Generate all robots
