@@ -26,7 +26,7 @@ class Robot:
 		self.x = tile_x_init * self.world.tile_pixel_w
 		self.tile_y = tile_y_init
 		self.y = tile_y_init * self.world.tile_pixel_h
-		world.occupancy[self.tile_y][self.tile_x] = self
+		world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
 		self.my_page = None
 		self.calc_page()
 		self.direction = 0
@@ -90,10 +90,10 @@ class Robot:
 		if self.diminish:
 			if self.diminish == 1:
 				self.costume = self.base_costume + 4
-				self.diminish = self.diminish + 1
+				self.diminish = 2
 				return
 			elif self.diminish == 2:
-				self.world.occupancy[self.tile_y][self.tile_x] = 0
+				self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 				self.leave_page()
 				return
 		if self.flicker_counter > 0:
@@ -290,8 +290,6 @@ class Robot:
 						if distance < min_distance:
 							min_distance = distance
 							pTarget = obj
-			if pTarget != None:
-				print("Found target!!")
 			return pTarget
 	
 	def fire(self):
@@ -347,11 +345,11 @@ class Robot:
 			self.point_right()
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y][self.tile_x + 1] == 0:
-					self.world.occupancy[self.tile_y][self.tile_x] = 0
+				if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x + 1] == 0:
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_x = self.tile_x + 1
 					self.dest_x = self.x + self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y][self.tile_x] = self
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
 					self.control_state = 1
 					self.movement_progress = 0
 					self.validate_page_col()
@@ -365,11 +363,11 @@ class Robot:
 			self.point_down()
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y + 1][self.tile_x] == 0:
-					self.world.occupancy[self.tile_y][self.tile_x] = 0
+				if self.world.occupancy[(self.tile_y + 1) * self.world.bgnd_tiles_width + self.tile_x] == 0:
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_y = self.tile_y + 1
 					self.dest_y = self.y + self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y][self.tile_x] = self
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
 					self.control_state = 2
 					self.movement_progress = 0
 					self.validate_page_row()
@@ -384,11 +382,11 @@ class Robot:
 			self.point_left()
 			#If free to move
 			try:
-				if self.tile_x >= 1 and self.world.occupancy[self.tile_y][self.tile_x - 1] == 0:
-					self.world.occupancy[self.tile_y][self.tile_x] = 0
+				if self.tile_x >= 1 and self.world.occupancy[(self.tile_y * self.world.bgnd_tiles_width) + self.tile_x - 1] == 0:
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_x = self.tile_x - 1
 					self.dest_x = self.x - self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y][self.tile_x] = self
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
 					self.control_state = 3
 					self.movement_progress = 0
 					self.validate_page_col()
@@ -403,11 +401,11 @@ class Robot:
 			self.point_up()
 			#If free to move
 			try:
-				if self.tile_y >= 1 and self.world.occupancy[self.tile_y - 1][self.tile_x] == 0:
-					self.world.occupancy[self.tile_y][self.tile_x] = 0
+				if self.tile_y >= 1 and self.world.occupancy[(self.tile_y - 1)*self.world.bgnd_tiles_width + self.tile_x] == 0:
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_y = self.tile_y - 1
 					self.dest_y = self.y - self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y][self.tile_x] = self
+					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
 					self.control_state = 4
 					self.movement_progress = 0
 					self.validate_page_row()

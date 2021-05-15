@@ -119,9 +119,9 @@ screen_height = displayInfo.current_h
 
 screen = None
 if config.FULLSCREEN:
-	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, 8)
+	screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF, config.BIT_RESOLUTION)
 else:
-	screen = pygame.display.set_mode((576, 432), 0, 8)
+	screen = pygame.display.set_mode((576, 432), 0, config.BIT_RESOLUTION)
 
 #Load the main menu world
 world = World(screen)
@@ -167,6 +167,9 @@ press_btn2_box_surface = world.scale(pygame.image.load("Images/HUD/pressButton2.
 press_btn2_fill_black = press_btn2_box_surface.copy()
 press_btn2_fill_black.fill((0,0,0))
 press_btn2_box_frame = (int(floor(140 * world.scale_x)), int(floor(310 * world.scale_y)))
+
+test_arr = file_to_fake_2D_list_ints("data/test.txt")
+#print(test_arr)
 
 #Initialize your robot
 #your_robot = Robot(world, pagetable, 0, 4, 11)
@@ -441,7 +444,7 @@ while True:
 		world.load_world("data/world" + str(level) + ".txt")
 		pagetable.load_blank(world)
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
-		print("YOUR ROBOT ID: " + str(hex(id(your_robot))))
+		#print("YOUR ROBOT ID: " + str(hex(id(your_robot))))
 		your_robot.ai = False
 		fire_cooldown = 0
 		
@@ -509,8 +512,9 @@ while True:
 				game_state = 5
 				break
 			
-			pygame.display.flip()
 			clock.tick_busy_loop(30)
+			pygame.display.flip()
+			
 			
 #####################################################
 #####################################################

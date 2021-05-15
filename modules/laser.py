@@ -85,13 +85,12 @@ class Laser:
 				return
 			old_tile = self.tile_x
 			tile_max_extend = self.tile_x + 3
-			row_array = self.world.occupancy[self.tile_y]
-			len_row_array = len(row_array)
-			if tile_max_extend > len_row_array:
+			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
+			if tile_max_extend > self.world.bgnd_tiles_height:
 				self.disperse = True
-				tile_max_extend = len_row_array
+				tile_max_extend = self.world.bgnd_tiles_height
 			while self.tile_x < tile_max_extend:
-				tile_value = row_array[self.tile_x]
+				tile_value = self.world.occupancy[index]
 				if isinstance(tile_value, robot.Robot):
 					tile_value.get_shot()
 					self.disperse = True
@@ -100,6 +99,7 @@ class Laser:
 					self.disperse = True
 					break
 				self.tile_x = self.tile_x + 1
+				index = index + 1
 			self.position_x_by_tile(old_tile)
 			costume = self.tile_x - old_tile - 1
 			if costume >= 0:
@@ -112,12 +112,13 @@ class Laser:
 				return
 			old_tile = self.tile_y
 			tile_max_extend = self.tile_y + 3
-			num_rows = len(self.world.occupancy)
+			num_rows = self.world.bgnd_tiles_width
+			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend > num_rows:
 				self.disperse = True
 				tile_max_extend = num_rows
 			while self.tile_y < tile_max_extend:
-				tile_value = self.world.occupancy[self.tile_y][self.tile_x]
+				tile_value = self.world.occupancy[index]
 				if isinstance(tile_value, robot.Robot):
 					tile_value.get_shot()
 					self.disperse = True
@@ -126,6 +127,7 @@ class Laser:
 					self.disperse = True
 					break
 				self.tile_y = self.tile_y + 1
+				index = index + self.world.bgnd_tiles_width
 			self.position_y_by_tile(old_tile)
 			costume = self.tile_y - old_tile - 1
 			if costume >= 0:
@@ -138,12 +140,12 @@ class Laser:
 				return
 			old_tile = self.tile_x
 			tile_max_extend = self.tile_x - 3
+			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend < 0:
 				self.disperse = True
 				tile_max_extend = 0
-			row_array = self.world.occupancy[self.tile_y]
 			while self.tile_x >= tile_max_extend:
-				tile_value = row_array[self.tile_x]
+				tile_value = self.world.occupancy[index]
 				if isinstance(tile_value, robot.Robot):
 					tile_value.get_shot()
 					self.disperse = True
@@ -152,6 +154,7 @@ class Laser:
 					self.disperse = True
 					break
 				self.tile_x = self.tile_x - 1
+				index = index - 1
 			self.position_x_by_tile(self.tile_x + 1)
 			costume = old_tile - self.tile_x - 1
 			if costume >= 0:
@@ -164,11 +167,12 @@ class Laser:
 				return
 			old_tile = self.tile_y
 			tile_max_extend = self.tile_y - 3
+			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend < 0:
 				self.disperse = True
 				tile_max_extend = 0
 			while self.tile_y >= tile_max_extend:
-				tile_value = self.world.occupancy[self.tile_y][self.tile_x]
+				tile_value = self.world.occupancy[index]
 				if isinstance(tile_value, robot.Robot):
 					tile_value.get_shot()
 					self.disperse = True
@@ -177,6 +181,7 @@ class Laser:
 					self.disperse = True
 					break
 				self.tile_y = self.tile_y - 1
+				index = index - self.world.bgnd_tiles_width
 			self.position_y_by_tile(self.tile_y + 1)
 			costume = old_tile - self.tile_y - 1
 			if costume >= 0:

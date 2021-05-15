@@ -114,7 +114,7 @@ class PathNode:
 		tentative_x_off = self.off_tile_x + 1
 		tentative_y_off = self.off_tile_y
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
+			if self.path.world.occupancy[(self.path.tile_y_orig + tentative_y_off) * self.path.world.bgnd_tiles_width + (self.path.tile_x_orig + tentative_x_off)] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 0)
 			else:
 				return None
@@ -125,7 +125,7 @@ class PathNode:
 		tentative_x_off = self.off_tile_x
 		tentative_y_off = self.off_tile_y + 1
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
+			if self.path.world.occupancy[(self.path.tile_y_orig + tentative_y_off) * self.path.world.bgnd_tiles_width + (self.path.tile_x_orig + tentative_x_off)] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 1)
 			else:
 				return None
@@ -136,7 +136,7 @@ class PathNode:
 		tentative_x_off = self.off_tile_x - 1
 		tentative_y_off = self.off_tile_y
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
+			if self.path.world.occupancy[(self.path.tile_y_orig + tentative_y_off) * self.path.world.bgnd_tiles_width + (self.path.tile_x_orig + tentative_x_off)] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 2)
 			else:
 				return None
@@ -147,7 +147,7 @@ class PathNode:
 		tentative_x_off = self.off_tile_x
 		tentative_y_off = self.off_tile_y - 1
 		try:
-			if self.path.world.occupancy[self.path.tile_y_orig + tentative_y_off][self.path.tile_x_orig + tentative_x_off] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
+			if self.path.world.occupancy[(self.path.tile_y_orig + tentative_y_off) * self.path.world.bgnd_tiles_width + (self.path.tile_x_orig + tentative_x_off)] == 0 or (tentative_x_off == self.path.off_tile_x_dest and tentative_y_off == self.path.off_tile_y_dest):
 				return PathNode(self, 3)
 			else:
 				return None

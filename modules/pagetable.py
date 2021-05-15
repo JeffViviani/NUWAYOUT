@@ -56,8 +56,9 @@ class PageTable:
 	# Every row in 'world.bgnd_tiles' has the same number of columns.
 	#
 	def load_blank(self, world):
-		self.num_indices = int(ceil(len(world.bgnd_tiles) / float(PAGETABLE_N)))
-		self.num_sub_indices = int(ceil(len(world.bgnd_tiles[0]) / float(PAGETABLE_N)))
+		self.num_indices = world.bgnd_tiles_height // PAGETABLE_N + 1
+		print(world.bgnd_tiles_width)
+		self.num_sub_indices = world.bgnd_tiles_width // PAGETABLE_N + 1
 		self.table = []
 		index = 0
 		while index < self.num_indices:
