@@ -6,8 +6,8 @@ from filestream import *
 GAME_NATIVE_W = 576.0
 GAME_NATIVE_H = 432.0
 
-PRINT_WIDTH = 30 #30
-PRINT_HEIGHT = 23 #23
+PRINT_WIDTH = 30
+PRINT_HEIGHT = 23
 
 class World:
 	def __init__(self, screen):
@@ -21,6 +21,8 @@ class World:
 		self.displayInfo = pygame.display.Info()
 		self.scale_x = self.displayInfo.current_w / GAME_NATIVE_W
 		self.scale_y = self.displayInfo.current_h / GAME_NATIVE_H
+		self.last_tile_x_init = None
+		self.last_tile_y_init = None
 		self.tile_surfaces = []
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile0.png")))
 		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile1.png")))
@@ -31,6 +33,8 @@ class World:
 		self.camera_focus_offset_x = int(floor(0 - self.tile_pixel_w * 13.5))
 		self.camera_focus_offset_y = int(floor(0 - self.tile_pixel_h * 10.5))
 		self.frame = pygame.Rect(0, 0, self.tile_pixel_w, self.tile_pixel_h)
+		self.render_panel = pygame.Surface((self.tile_pixel_w * PRINT_WIDTH, self.tile_pixel_h * PRINT_HEIGHT))
+		self.render_panel_temp = self.render_panel.copy()
 		
 	def load_world(self, file):
 		self.bgnd_tiles, self.bgnd_tiles_width, self.bgnd_tiles_height = file_to_fake_2D_list_ints(file)
@@ -47,17 +51,61 @@ class World:
 	def focus_camera(self, robot):
 		self.camera_x = robot.x + self.camera_focus_offset_x
 		self.camera_y = robot.y + self.camera_focus_offset_y
+		
+	def render_partial(self):
+		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
+		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
+		if tile_x_pos_init > self.last_tile_x_pos_init:
+			self.last_tile_x_pos_init = tile_x_pos_init
+			#Shift the render_pane one tile to the left
+			self.render_panel_temp.blit(self.render_panel, (0 - self.tile_pixel_w, 0))
+			self.render_panel.blit(self.render_panel_temp, (0,0))
+			#Render the new rightmost column
+			index = self.bgnd_tiles_width * tile_y_pos_init + tile_x_pos_init + PRINT_WIDTH - 1
+			frame = self.frame
+			frame.left = self.tile_pixel_w * (PRINT_WIDTH - 1)
+			frame.top = 0
+			
+			cnt = 0
+			print("x:" + str(tile_x_pos_init))
+			print("y:" + str(tile_y_pos_init))
+			print("LEN: " + str(len(self.bgnd_tiles)))
+			while(cnt < PRINT_HEIGHT):
+				print("INDEX: " + str(index))
+				tile_to_blit = None
+				if index > 0 and index < len(self.bgnd_tiles):
+					print("TILE TYPE: " + str(self.bgnd_tiles[index]))
+					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
+				else:
+					tile_to_blit = self.tile_surfaces[3]
+				self.render_panel.blit(tile_to_blit, frame)
+				cnt = cnt + 1
+				index = index + self.bgnd_tiles_width
+				frame.top = frame.top + self.tile_pixel_h
+		elif tile_x_pos_init < self.last_tile_x_pos_init:
+			cnt = None
+		elif tile_y_pos_init > self.last_tile_y_pos_init:
+			cnt = None
+		elif tile_y_pos_init < self.last_tile_y_pos_init:
+			cnt = None
+		self.screen.blit(self.render_panel, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
 
-	def render(self):
+	def render_full(self):
 		#Begin one tile to the left
 		dark_tile = self.tile_surfaces[3]
+		#frame = self.frame
+		#frame_left_init = 0 - (self.camera_x % self.tile_pixel_w)
+		#frame.left = frame_left_init
+		#frame.top = 0 - self.camera_y % self.tile_pixel_h
 		frame = self.frame
-		frame_left_init = 0 - (self.camera_x % self.tile_pixel_w)
+		frame_left_init = 0
 		frame.left = frame_left_init
-		frame.top = 0 - self.camera_y % self.tile_pixel_h
+		frame.top = 0
 		
 		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
 		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
+		self.last_tile_x_pos_init = tile_x_pos_init
+		self.last_tile_y_pos_init = tile_y_pos_init
 		#print(len(self.bgnd_tiles))
 		
 		arr_index_init = 0
@@ -217,7 +265,7 @@ class World:
 				#print("Print tile at array index " + str(arr_index))
 				tile_to_blit = self.tile_surfaces[self.bgnd_tiles[arr_index]]
 				arr_index = arr_index + 1
-			self.screen.blit(tile_to_blit, frame)
+			self.render_panel.blit(tile_to_blit, frame)
 			frame = frame.move(self.tile_pixel_w, 0)
 			index = index + 1
 			if index == newline_index:
@@ -230,6 +278,7 @@ class World:
 				newline_index = newline_index + PRINT_WIDTH
 				frame.left = frame_left_init
 				frame.top = frame.top + self.tile_pixel_h
+		self.screen.blit(self.render_panel, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
 			
 	def pan(self, x_shift, y_shift):
 		self.camera_x = self.camera_x + x_shift

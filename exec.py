@@ -171,6 +171,23 @@ press_btn2_box_frame = (int(floor(140 * world.scale_x)), int(floor(310 * world.s
 test_arr = file_to_fake_2D_list_ints("data/test.txt")
 #print(test_arr)
 
+#Initialize health bar
+
+health_bar_outer_top = int(floor(5 * world.scale_y))
+health_bar_outer_left = int(floor(429 * world.scale_x))
+health_bar_outer_width = int(floor(143 * world.scale_x))
+health_bar_outer_height = int(floor(21 * world.scale_y))
+
+health_bar_inner_top = int(floor(5 * world.scale_y))
+health_bar_inner_left = int(floor(5 * world.scale_x))
+health_bar_inner_width = int(floor(133 * world.scale_x))
+health_bar_inner_height = int(floor(11 * world.scale_y))
+
+health_bar_outer_rect = pygame.Rect(health_bar_outer_left, health_bar_outer_top, health_bar_outer_width, health_bar_outer_height)
+health_bar_inner_rect = pygame.Rect(health_bar_inner_left, health_bar_inner_top, health_bar_inner_width, health_bar_inner_height)
+health_bar_surface = pygame.Surface((health_bar_outer_width, health_bar_outer_height))
+pygame.draw.rect(health_bar_surface, (0,0,0), pygame.Rect(0,0,health_bar_outer_width,health_bar_outer_height))
+
 #Initialize your robot
 #your_robot = Robot(world, pagetable, 0, 4, 11)
 
@@ -210,7 +227,7 @@ while True:
 			if keys[pygame.K_DOWN]:
 				world.pan(0,8)
 					
-		world.render()
+		world.render_full()
 		render_page(pagetable, 0, 0)
 		render_page(pagetable, 0, 1)
 		pygame.display.flip()
@@ -277,7 +294,7 @@ while True:
 					menu_scroll_state = 0
 						
 			clock.tick(30)
-			world.render()
+			world.render_full()
 			render_page(pagetable, 0, 0)
 			render_page(pagetable, 0, 1)
 			screen.blit(title_surface, title_frame)
@@ -448,6 +465,9 @@ while True:
 		your_robot.ai = False
 		fire_cooldown = 0
 		
+		world.focus_camera(your_robot)
+		world.render_full()
+		
 		while game_state == 4:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
@@ -491,7 +511,7 @@ while True:
 			#Render the background
 			
 			world.focus_camera(your_robot)
-			world.render()
+			world.render_full()
 			
 			#Render lasers
 			Laser.process_all_lasers()
@@ -507,12 +527,16 @@ while True:
 			render_page(pagetable, your_robot.page_row, your_robot.page_col+1)
 			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
 			
+			#Render the health bar
+			pygame.draw.rect(health_bar_surface, (255,255,255), health_bar_inner_rect)
+			screen.blit(health_bar_surface, health_bar_outer_rect)
+			
 			if your_robot.diminish == 2:
 				#You lost!
 				game_state = 5
 				break
 			
-			clock.tick_busy_loop(30)
+			clock.tick_busy_loop(0)
 			pygame.display.flip()
 			
 			

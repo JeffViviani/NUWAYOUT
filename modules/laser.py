@@ -86,9 +86,9 @@ class Laser:
 			old_tile = self.tile_x
 			tile_max_extend = self.tile_x + 3
 			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
-			if tile_max_extend > self.world.bgnd_tiles_height:
+			if tile_max_extend > self.world.bgnd_tiles_width:
 				self.disperse = True
-				tile_max_extend = self.world.bgnd_tiles_height
+				tile_max_extend = self.world.bgnd_tiles_width
 			while self.tile_x < tile_max_extend:
 				tile_value = self.world.occupancy[index]
 				if isinstance(tile_value, robot.Robot):
