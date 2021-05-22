@@ -10,7 +10,7 @@ class Robot:
 	image_widths = [None]*15
 	image_surfaces = [None]*15
 	id_counter = 0
-	def __init__(self, world, pagetable, type, tile_x_init, tile_y_init):
+	def __init__(self, world, pagetable, type, personality, tile_x_init, tile_y_init):
 		self.ai = True
 		self.world = world
 		self.pagetable = pagetable
@@ -19,7 +19,7 @@ class Robot:
 		self.costume = self.base_costume
 		self.target = None
 		self.path = None
-		self.personality = 0
+		self.personality = personality
 		if self.personality == 0:
 			self.preferred_dist = random.randint(3,6)
 		self.tile_x = tile_x_init

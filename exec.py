@@ -63,8 +63,8 @@ def load_robots(world, pagetable, file):
 	firstRef = None
 	while item < num_items:
 		new_robot = Robot(world, pagetable, robot_list[item],
-		                  robot_list[item + 1], robot_list[item + 2])
-		item = item + 3
+		                  robot_list[item + 1], robot_list[item + 2], robot_list[item + 3])
+		item = item + 4
 		if first == 0:
 			first = 1
 			firstRef = new_robot
@@ -438,7 +438,7 @@ while True:
 	if game_state == 4:
 	
 		pygame.mixer.music.stop()
-		pygame.mixer.music.load("Audio/Space.mp2")
+		pygame.mixer.music.load("Audio/RampantNoiseEqualized.mp3")
 		pygame.mixer.music.play(-1)
 		
 		world.load_world("data/world" + str(level) + ".txt")

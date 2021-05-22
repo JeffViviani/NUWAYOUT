@@ -32,6 +32,8 @@ def file_to_fake_2D_list_ints(file):
 				height = height + 1
 				stnd = False
 		elif c != '\n' and c != '\r':
+			if not str.isdigit(c):
+				c = '1'
 			stnd = True
 			width = width + 1
 			lst.append(int(c))
