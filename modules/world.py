@@ -67,14 +67,9 @@ class World:
 			frame.top = 0
 			
 			cnt = 0
-			print("x:" + str(tile_x_pos_init))
-			print("y:" + str(tile_y_pos_init))
-			print("LEN: " + str(len(self.bgnd_tiles)))
 			while(cnt < PRINT_HEIGHT):
-				print("INDEX: " + str(index))
 				tile_to_blit = None
 				if index > 0 and index < len(self.bgnd_tiles):
-					print("TILE TYPE: " + str(self.bgnd_tiles[index]))
 					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
 				else:
 					tile_to_blit = self.tile_surfaces[3]
@@ -83,11 +78,72 @@ class World:
 				index = index + self.bgnd_tiles_width
 				frame.top = frame.top + self.tile_pixel_h
 		elif tile_x_pos_init < self.last_tile_x_pos_init:
-			cnt = None
+			self.last_tile_x_pos_init = tile_x_pos_init
+			#Shift the render_pane one tile to the right
+			self.render_panel_temp.blit(self.render_panel, (self.tile_pixel_w, 0))
+			self.render_panel.blit(self.render_panel_temp, (0,0))
+			#Render the new leftmost column
+			index = self.bgnd_tiles_width * tile_y_pos_init + tile_x_pos_init
+			frame = self.frame
+			frame.left = 0
+			frame.top = 0
+			
+			cnt = 0
+			while(cnt < PRINT_HEIGHT):
+				tile_to_blit = None
+				if index > 0 and index < len(self.bgnd_tiles):
+					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
+				else:
+					tile_to_blit = self.tile_surfaces[3]
+				self.render_panel.blit(tile_to_blit, frame)
+				cnt = cnt + 1
+				index = index + self.bgnd_tiles_width
+				frame.top = frame.top + self.tile_pixel_h
+			
 		elif tile_y_pos_init > self.last_tile_y_pos_init:
-			cnt = None
+			self.last_tile_y_pos_init = tile_y_pos_init
+			#Shift the render_pane one tile up
+			self.render_panel_temp.blit(self.render_panel, (0, 0 - self.tile_pixel_h))
+			self.render_panel.blit(self.render_panel_temp, (0,0))
+			#Render the new leftmost column
+			index = self.bgnd_tiles_width * (tile_y_pos_init + PRINT_HEIGHT - 1) + tile_x_pos_init
+			frame = self.frame
+			frame.left = 0
+			frame.top = self.tile_pixel_h * (PRINT_HEIGHT - 1)
+			
+			cnt = 0
+			while(cnt < PRINT_WIDTH):
+				tile_to_blit = None
+				if index > 0 and index < len(self.bgnd_tiles):
+					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
+				else:
+					tile_to_blit = self.tile_surfaces[3]
+				self.render_panel.blit(tile_to_blit, frame)
+				cnt = cnt + 1
+				index = index + 1
+				frame.left = frame.left + self.tile_pixel_w
 		elif tile_y_pos_init < self.last_tile_y_pos_init:
-			cnt = None
+			self.last_tile_y_pos_init = tile_y_pos_init
+			#Shift the render_pane one tile down
+			self.render_panel_temp.blit(self.render_panel, (0, self.tile_pixel_h))
+			self.render_panel.blit(self.render_panel_temp, (0,0))
+			#Render the new topmost column
+			index = self.bgnd_tiles_width * (tile_y_pos_init) + tile_x_pos_init
+			frame = self.frame
+			frame.left = 0
+			frame.top = 0
+			
+			cnt = 0
+			while(cnt < PRINT_WIDTH):
+				tile_to_blit = None
+				if index > 0 and index < len(self.bgnd_tiles):
+					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
+				else:
+					tile_to_blit = self.tile_surfaces[3]
+				self.render_panel.blit(tile_to_blit, frame)
+				cnt = cnt + 1
+				index = index + 1
+				frame.left = frame.left + self.tile_pixel_w
 		self.screen.blit(self.render_panel, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
 
 	def render_full(self):

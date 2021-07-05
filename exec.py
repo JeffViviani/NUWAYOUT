@@ -511,7 +511,7 @@ while True:
 			#Render the background
 			
 			world.focus_camera(your_robot)
-			world.render_full()
+			world.render_partial()
 			
 			#Render lasers
 			Laser.process_all_lasers()
@@ -536,7 +536,7 @@ while True:
 				game_state = 5
 				break
 			
-			clock.tick_busy_loop(0)
+			clock.tick_busy_loop(60)
 			pygame.display.flip()
 			
 			
