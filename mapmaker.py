@@ -109,13 +109,38 @@ def plot(arr, screen_x, screen_y, data):
 				arr[cnt].insert(0,3)
 				fill_cnt += 1
 			cnt += 1
-		map_width = lvl_two
+		map_width = map_width - lvl_two
 		tile_x_topleft -= lvl_two
 		lvl_two = 0
 		
 	arr[lvl_one][lvl_two] = data
 		
+def plot_area(arr, screen_x_1, screen_y_1, screen_x_2, screen_y_2, data):
+	cnt_y_max = abs(screen_y_1 - screen_y_2)
+	cnt_y = 0
+	y = screen_y_1
+	adj_y = None
+	if screen_y_1 > screen_y_2:
+		adj_y = -1
+	else:
+		adj_y = 1
+	cnt_x_max = abs(screen_x_1 - screen_x_2)
+	adj_x = None
+	if screen_x_1 > screen_x_2:
+		adj_x = -1
+	else:
+		adj_x = 1
 	
+	while cnt_y <= cnt_y_max:
+		cnt_x = 0
+		x = screen_x_1
+		while cnt_x <= cnt_x_max:
+			plot(arr, x, y, data)
+			x += adj_x
+			cnt_x += 1
+		y += adj_y
+		cnt_y += 1
+		
 
 print("WELCOME TO NUWAYOUT MAP MAKER!")
 response = input("Load existing map (Y) or create new one? (N)")
@@ -142,6 +167,9 @@ tile_y_topleft = 0
 current_tile = 0
 current_tile_frame = pygame.Rect(0, 0, 20, 20)
 
+area_fill_x1 = None
+area_fill_y1 = None
+
 mouse_right_down = False
 
 while True:
@@ -160,18 +188,22 @@ while True:
 				sys.exit()
 				
 	mouse_status = pygame.mouse.get_pressed()
-				
-	keys = pygame.key.get_pressed()
-	if keys[pygame.K_d]:
-		tile_x_topleft += 1
-	elif keys[pygame.K_a]:
-		tile_x_topleft -= 1
-	elif keys[pygame.K_w]:
-		tile_y_topleft -= 1
-	elif keys[pygame.K_s]:
-		tile_y_topleft += 1
 	if mouse_status[0] == True:
 		plot(map, x_pos_on_screen, y_pos_on_screen, current_tile)
+		area_fill_x1 = None
+		area_fill_y1 = None
+	if mouse_status[1] == True:
+		if not mouse_middle_down:
+			mouse_middle_down = True
+			if area_fill_x1 == None:
+				area_fill_x1 = x_pos_on_screen
+				area_fill_y1 = y_pos_on_screen
+			else:
+				plot_area(map, area_fill_x1, area_fill_y1, x_pos_on_screen, y_pos_on_screen, current_tile)
+				area_fill_x1 = None
+				area_fill_y1 = None
+	else:
+		mouse_middle_down = False
 	if mouse_status[2] == True:
 		if not mouse_right_down:
 			mouse_right_down = True
@@ -180,6 +212,24 @@ while True:
 				current_tile = 0
 	else:
 		mouse_right_down = False
+		
+	keys = pygame.key.get_pressed()
+	if keys[pygame.K_d]:
+		tile_x_topleft += 1
+		if area_fill_x1 != None:
+			area_fill_x1 -= 1
+	elif keys[pygame.K_a]:
+		tile_x_topleft -= 1
+		if area_fill_x1 != None:
+			area_fill_x1 += 1
+	elif keys[pygame.K_w]:
+		tile_y_topleft -= 1
+		if area_fill_y1 != None:
+			area_fill_y1 += 1
+	elif keys[pygame.K_s]:
+		tile_y_topleft += 1
+		if area_fill_y1 != None:
+			area_fill_y1 -= 1
 				
 	#Render current background
 	render_full()

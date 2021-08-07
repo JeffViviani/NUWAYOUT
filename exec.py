@@ -178,9 +178,14 @@ health_bar_outer_left = int(floor(429 * world.scale_x))
 health_bar_outer_width = int(floor(143 * world.scale_x))
 health_bar_outer_height = int(floor(21 * world.scale_y))
 
-health_bar_inner_top = int(floor(5 * world.scale_y))
-health_bar_inner_left = int(floor(5 * world.scale_x))
+health_bar_inner_top = int(floor(10 * world.scale_y))
+health_bar_inner_left = int(floor(434 * world.scale_x))
 health_bar_inner_width = int(floor(133 * world.scale_x))
+health_bar_inner_widths = []
+cnt = 0
+while cnt < 100:
+	health_bar_inner_widths.append(int(floor((cnt / 100) * health_bar_inner_width)))
+	cnt += 1
 health_bar_inner_height = int(floor(11 * world.scale_y))
 
 health_bar_outer_rect = pygame.Rect(health_bar_outer_left, health_bar_outer_top, health_bar_outer_width, health_bar_outer_height)
@@ -463,6 +468,7 @@ while True:
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
 		#print("YOUR ROBOT ID: " + str(hex(id(your_robot))))
 		your_robot.ai = False
+		your_robot.health = 99
 		fire_cooldown = 0
 		
 		world.focus_camera(your_robot)
@@ -528,8 +534,9 @@ while True:
 			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
 			
 			#Render the health bar
-			pygame.draw.rect(health_bar_surface, (255,255,255), health_bar_inner_rect)
-			screen.blit(health_bar_surface, health_bar_outer_rect)
+			health_bar_inner_rect.width = health_bar_inner_widths[your_robot.health]			
+			pygame.draw.rect(screen, (0,0,0), health_bar_outer_rect)
+			pygame.draw.rect(screen, (72,212,51), health_bar_inner_rect)
 			
 			if your_robot.diminish == 2:
 				#You lost!
