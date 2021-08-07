@@ -7,6 +7,10 @@ import math
 PRINT_WIDTH = 29
 PRINT_HEIGHT = 23
 
+BLACK_TILE = 50
+TILE_CYCLE_JMP = 1 #After tile 1 it jumps to 50 when scrolling through the tiles.
+LAST_TILE = 51
+
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
@@ -21,11 +25,29 @@ map_width = 0
 map_height = 0
 
 #Load all tiles into array
-tile_surfaces = []
-tile_surfaces.append(pygame.image.load("Images/Tiles/tile0.png"))
-tile_surfaces.append(pygame.image.load("Images/Tiles/tile1.png"))
-tile_surfaces.append(pygame.image.load("Images/Tiles/tile2.png"))
-tile_surfaces.append(pygame.image.load("Images/Tiles/tile3.png"))
+tile_surfaces = [None] * 100
+
+#Tile 50 is the breaking point. Tiles > 50 are ones robots cannot walk on.
+#Tiles <= 50 are ones robots can walk on.
+tile_surfaces[0] = pygame.image.load("Images/Tiles/tile0.png")
+tile_surfaces[1] = pygame.image.load("Images/Tiles/tile1.png")
+tile_surfaces[50] = pygame.image.load("Images/Tiles/tile50.png")
+tile_surfaces[51] = pygame.image.load("Images/Tiles/tile51.png")
+
+robot_surfaces = [None] * 3
+
+robot_surfaces[0] = pygame.image.load("Images/Robots/blue_front.png")
+robot_surfaces[1] = pygame.image.load("Images/Robots/orange_front.png")
+robot_surfaces[2] = pygame.image.load("Images/Robots/red_front.png")
+
+#Load personality indicator dots
+personality_dots = [None] * 6
+personality_dots[0] = pygame.image.load("Images/Robots/Personality_Dots/0.png")
+personality_dots[1] = pygame.image.load("Images/Robots/Personality_Dots/1.png")
+personality_dots[2] = pygame.image.load("Images/Robots/Personality_Dots/2.png")
+personality_dots[3] = pygame.image.load("Images/Robots/Personality_Dots/3.png")
+personality_dots[4] = pygame.image.load("Images/Robots/Personality_Dots/4.png")
+personality_dots[5] = pygame.image.load("Images/Robots/Personality_Dots/5.png")
 
 displayInfo = pygame.display.Info()
 screen_width = displayInfo.current_w
@@ -47,11 +69,19 @@ def render_full():
 		print_col = 0
 		ref_tile_x = tile_x_topleft
 		while print_col < PRINT_WIDTH:
+			robot_to_blit = None
+			personality_to_blit = None
 			if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
-				tile_to_blit = 3
+				tile_to_blit = BLACK_TILE
 			else:
-				tile_to_blit = int(map[ref_tile_y][ref_tile_x])
+				dat = map[ref_tile_y][ref_tile_x]
+				tile_to_blit = int(dat[0])
+				robot_to_blit = dat[1]
+				personality_to_blit = dat[2]
 			screen.blit(tile_surfaces[tile_to_blit], frame)
+			if robot_to_blit != None:
+				screen.blit(robot_surfaces[robot_to_blit], frame)
+				screen.blit(personality_dots[personality_to_blit], frame)
 			frame.left += 20
 			print_col += 1
 			ref_tile_x += 1
@@ -70,7 +100,7 @@ def plot(arr, screen_x, screen_y, data):
 			arr.append([])
 			fill_cnt = 0
 			while fill_cnt < map_width:
-				arr[len(arr) - 1].append(3)
+				arr[len(arr) - 1].append([BLACK_TILE, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_height = lvl_one + 1
@@ -81,7 +111,7 @@ def plot(arr, screen_x, screen_y, data):
 			arr.insert(0,[])
 			fill_cnt = 0
 			while fill_cnt < map_width:
-				arr[0].append(3)
+				arr[0].append([BLACK_TILE, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_height = len(arr)
@@ -95,7 +125,7 @@ def plot(arr, screen_x, screen_y, data):
 		while cnt < cnt_max:
 			fill_cnt = 0
 			while fill_cnt < fill_cnt_max:
-				arr[cnt].append(3)
+				arr[cnt].append([BLACK_TILE, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_width = lvl_two + 1
@@ -106,14 +136,14 @@ def plot(arr, screen_x, screen_y, data):
 		while cnt < cnt_max:
 			fill_cnt = 0
 			while fill_cnt < fill_cnt_max:
-				arr[cnt].insert(0,3)
+				arr[cnt].insert(0,[BLACK_TILE, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_width = map_width - lvl_two
 		tile_x_topleft -= lvl_two
 		lvl_two = 0
 		
-	arr[lvl_one][lvl_two] = data
+	arr[lvl_one][lvl_two] = [data, None, None, None]
 		
 def plot_area(arr, screen_x_1, screen_y_1, screen_x_2, screen_y_2, data):
 	cnt_y_max = abs(screen_y_1 - screen_y_2)
@@ -140,6 +170,28 @@ def plot_area(arr, screen_x_1, screen_y_1, screen_x_2, screen_y_2, data):
 			cnt_x += 1
 		y += adj_y
 		cnt_y += 1
+		
+def plot_robot(arr, screen_x, screen_y, type):
+	lvl_one = screen_y + tile_y_topleft
+	lvl_two = screen_x + tile_x_topleft
+	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
+		if map[lvl_one][lvl_two][0] < BLACK_TILE:
+			current_robot = map[lvl_one][lvl_two][1]
+			if current_robot == None:
+				map[lvl_one][lvl_two][1] = 0
+				map[lvl_one][lvl_two][2] = 0
+			elif current_robot == 1:
+				map[lvl_one][lvl_two][1] = None
+			else:
+				current_robot += 1
+				map[lvl_one][lvl_two][1] = current_robot
+				
+def change_personality(arr, screen_x, screen_y, type):
+	lvl_one = screen_y + tile_y_topleft
+	lvl_two = screen_x + tile_x_topleft
+	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
+		if map[lvl_one][lvl_two][1] != None:
+			current_personality = map[lvl_one][lvl_two][2] = type
 		
 
 print("WELCOME TO NUWAYOUT MAP MAKER!")
@@ -170,7 +222,11 @@ current_tile_frame = pygame.Rect(0, 0, 20, 20)
 area_fill_x1 = None
 area_fill_y1 = None
 
+display_follower = 1
+
 mouse_right_down = False
+key_r_down = True
+key_h_down = True
 
 while True:
 	#Display the follower tile by the mouse pointer
@@ -207,9 +263,12 @@ while True:
 	if mouse_status[2] == True:
 		if not mouse_right_down:
 			mouse_right_down = True
-			current_tile += 1
-			if current_tile == 4:
+			if current_tile == TILE_CYCLE_JMP:
+				current_tile = BLACK_TILE
+			elif current_tile == LAST_TILE:
 				current_tile = 0
+			else:
+				current_tile += 1
 	else:
 		mouse_right_down = False
 		
@@ -230,12 +289,39 @@ while True:
 		tile_y_topleft += 1
 		if area_fill_y1 != None:
 			area_fill_y1 -= 1
+	if keys[pygame.K_r]:
+		if not key_r_down:
+			plot_robot(map, x_pos_on_screen, y_pos_on_screen, 0)
+		key_r_down = True
+	else:
+		key_r_down = False
+		
+	if keys[pygame.K_h]:
+		if not key_h_down:
+			display_follower = 0 - display_follower
+		key_h_down = True
+	else:
+		key_h_down = False
+		
+	if keys[pygame.K_1]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 0)
+	elif keys[pygame.K_2]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 1)
+	elif keys[pygame.K_3]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 2)
+	elif keys[pygame.K_4]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 3)
+	elif keys[pygame.K_5]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 4)
+	elif keys[pygame.K_6]:
+		change_personality(map, x_pos_on_screen, y_pos_on_screen, 5)
 				
 	#Render current background
 	render_full()
 
 	current_tile_frame.left = x_pos_on_screen * 20
 	current_tile_frame.top = y_pos_on_screen * 20
-	screen.blit(tile_surfaces[current_tile], current_tile_frame)
+	if display_follower == 1:
+		screen.blit(tile_surfaces[current_tile], current_tile_frame)
 	clock.tick_busy_loop(60)
 	pygame.display.flip()

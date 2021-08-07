@@ -1,5 +1,5 @@
 
-# ABIVE LINE LEFT BLANK INTENTIONALLY
+# ABOVE LINE LEFT BLANK INTENTIONALLY
 ################################################################################
 # FILE: exec.py
 # DESCRIPTION: The main runtime file for NUWAYOUT. Run this file from the
@@ -562,7 +562,7 @@ while True:
 			if flash_state < 7:
 				if flash_state % 2 == 0:
 					screen.blit(screen_save_image, (0,0))
-					flash_state 
+					#flash_state 
 				else:
 					screen.fill((255,255,255))
 			flash_state = flash_state - 1
