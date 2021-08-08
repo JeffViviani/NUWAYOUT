@@ -23,11 +23,11 @@ class World:
 		self.scale_y = self.displayInfo.current_h / GAME_NATIVE_H
 		self.last_tile_x_init = None
 		self.last_tile_y_init = None
-		self.tile_surfaces = []
-		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile0.png")))
-		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile1.png")))
-		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile2.png")))
-		self.tile_surfaces.append(self.scale(pygame.image.load("Images/Tiles/tile3.png")))
+		self.tile_surfaces = [None] * 100
+		self.tile_surfaces[0] = self.scale(pygame.image.load("Images/Tiles/tile0.png"))
+		self.tile_surfaces[1] = self.scale(pygame.image.load("Images/Tiles/tile1.png"))
+		self.tile_surfaces[50] = self.scale(pygame.image.load("Images/Tiles/tile50.png"))
+		self.tile_surfaces[51] = self.scale(pygame.image.load("Images/Tiles/tile51.png"))
 		self.tile_pixel_w = int(floor(20 * self.scale_x))
 		self.tile_pixel_h = int(floor(20 * self.scale_y))
 		self.camera_focus_offset_x = int(floor(0 - self.tile_pixel_w * 13.5))
@@ -148,7 +148,7 @@ class World:
 
 	def render_full(self):
 		#Begin one tile to the left
-		dark_tile = self.tile_surfaces[3]
+		dark_tile = self.tile_surfaces[50]
 		#frame = self.frame
 		#frame_left_init = 0 - (self.camera_x % self.tile_pixel_w)
 		#frame.left = frame_left_init

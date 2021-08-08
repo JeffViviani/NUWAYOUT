@@ -168,9 +168,6 @@ press_btn2_fill_black = press_btn2_box_surface.copy()
 press_btn2_fill_black.fill((0,0,0))
 press_btn2_box_frame = (int(floor(140 * world.scale_x)), int(floor(310 * world.scale_y)))
 
-test_arr = file_to_fake_2D_list_ints("data/test.txt")
-#print(test_arr)
-
 #Initialize health bar
 
 health_bar_outer_top = int(floor(5 * world.scale_y))

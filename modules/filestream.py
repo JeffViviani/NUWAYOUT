@@ -15,12 +15,14 @@ def file_to_2D_list(file):
 	return lst
 	
 def file_to_fake_2D_list_ints(file):
+	digits_accumulated = 0
 	last_width = 0
 	width = 0
 	height = 0
 	lst = []
 	stnd = True
 	raw_file = open(file, mode='r')
+	digits = [None] * 3
 	while True:
 		c = raw_file.read(1)
 		if c == '':
@@ -32,11 +34,14 @@ def file_to_fake_2D_list_ints(file):
 				height = height + 1
 				stnd = False
 		elif c != '\n' and c != '\r':
-			if not str.isdigit(c):
-				c = '1'
-			stnd = True
-			width = width + 1
-			lst.append(int(c))
+			digits[digits_accumulated] = c
+			digits_accumulated += 1
+			if digits_accumulated == 3:
+				digit_str = digits[0] + digits[1] + digits[2]
+				stnd = True
+				width = width + 1
+				lst.append(int(digit_str))
+				digits_accumulated = 0
 	return (lst, last_width, height)
 
 def file_to_1D_list(file):

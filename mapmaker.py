@@ -55,6 +55,17 @@ screen_height = displayInfo.current_h
 
 screen = None
 
+file_world_obj_path = None
+file_robots_obj_path = None
+file_world_obj = None
+file_robots_obj = None
+
+#This is a pointer to the data for YOU the player. If a robot is chosen as the
+#player robot, then it is the one who you get to control. If it is changed later
+#on, this needs to be noted by changing the previously set player's robot to no
+#longer be the player robot. This pointer is helpful for that.
+player_data = None
+
 ######################################
 ########## FUNCTIONS #################
 ######################################
@@ -71,13 +82,19 @@ def render_full():
 		while print_col < PRINT_WIDTH:
 			robot_to_blit = None
 			personality_to_blit = None
-			if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
-				tile_to_blit = BLACK_TILE
-			else:
-				dat = map[ref_tile_y][ref_tile_x]
-				tile_to_blit = int(dat[0])
-				robot_to_blit = dat[1]
-				personality_to_blit = dat[2]
+			try:
+				if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
+					tile_to_blit = BLACK_TILE
+				else:
+					dat = map[ref_tile_y][ref_tile_x]
+					tile_to_blit = int(dat[0])
+					robot_to_blit = dat[1]
+					personality_to_blit = dat[2]
+			except TypeError:
+				print("ERROR!")
+				print(ref_tile_y)
+				print(ref_tile_x)
+				
 			screen.blit(tile_surfaces[tile_to_blit], frame)
 			if robot_to_blit != None:
 				screen.blit(robot_surfaces[robot_to_blit], frame)
@@ -171,6 +188,102 @@ def plot_area(arr, screen_x_1, screen_y_1, screen_x_2, screen_y_2, data):
 		y += adj_y
 		cnt_y += 1
 		
+def int_to_3digit_str(num):
+	if num == 0:
+		return "000"
+	num_str = str(num)
+	if len(num_str) < 3:
+		cnt = 0
+		while cnt < 3 - len(num_str):
+			num_str = '0' + num_str
+			cnt += 1
+	elif len(num_str) > 3:
+		num_str = num_str[0:3]
+	return num_str
+
+#Save the map to a text file. 3 digits per tile. Newline to new row. Robots are
+#Saved to their own separate file.
+def save():
+	file_world = open(file_world_obj_path, 'w')
+	file_robots = open(file_robots_obj_path, 'w')
+	cnt_y = 0
+	while cnt_y < map_height:
+		cnt_x = 0
+		while cnt_x < map_width:
+			tile_string = int_to_3digit_str(map[cnt_y][cnt_x][0])
+			file_world.write(tile_string)
+			if map[cnt_y][cnt_x][1] != None: # If a robot is on this tile
+				cursor = None
+				if map[cnt_y][cnt_x][3] == 1:
+					file_robots.seek(0,0)
+				file_robots.write(str(map[cnt_y][cnt_x][1])) #type
+				file_robots.write('\n')
+				file_robots.write(str(map[cnt_y][cnt_x][2])) #personality
+				file_robots.write('\n')
+				file_robots.write(str(cnt_x)) # x pos
+				file_robots.write('\n')
+				file_robots.write(str(cnt_y)) # y pos
+				file_robots.write('\n')
+				file_robots.seek(0,2)
+			cnt_x += 1
+		if cnt_y != map_height - 1:
+			file_world.write('\n')
+		cnt_y += 1
+	file_world.close()
+	if file_robots.tell() > 0:
+		file_robots.seek(1,2)
+		file_robots.truncate()
+	file_robots.close()
+	
+def load():
+	#Load world first then robots
+	file_world_obj = open(file_world_obj_path,'r')
+	file_robots_obj = open(file_robots_obj_path,'r')
+	file_world_obj.seek(0)
+	digits_read = 0
+	digits = [None] * 3
+	height = 1
+	map = [[]]
+	while True:
+		c = file_world_obj.read(1)
+		if c == '':
+			#End of file
+			break
+		elif c == '\n':
+			#New line.
+			map.append([])
+			height += 1
+		else:
+			digits[digits_read] = c
+			digits_read += 1
+			if digits_read == 3:
+				num_str = digits[0] + digits[1] + digits[2]
+				map[height - 1].append([int(num_str), None, None, None])
+				digits_read = 0
+	file_world_obj.close()
+	map_height = len(map)
+	map_width = len(map[0])
+	
+	#Load the robots
+	file_robots_obj.seek(0)
+	num_str = ""
+	num_items = 0
+	items = [None] * 4
+	while True:
+		c = file_robots_obj.read(1)
+		if c == '':
+			break
+		elif c == '\n':
+			items[num_items] = int(num_str)
+			num_items += 1
+			if num_items == 4:
+				data_lst = map[items[3]][items[2]] # List pos of robot
+				data_lst[1] = items[0] #type
+				data_lst[2] = items[1] #personality
+			num_str = ""
+		else:
+			num_str = num_str + c
+		
 def plot_robot(arr, screen_x, screen_y, type):
 	lvl_one = screen_y + tile_y_topleft
 	lvl_two = screen_x + tile_x_topleft
@@ -192,22 +305,35 @@ def change_personality(arr, screen_x, screen_y, type):
 	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
 		if map[lvl_one][lvl_two][1] != None:
 			current_personality = map[lvl_one][lvl_two][2] = type
+			
+def set_player_robot(arr, screen_x, screen_y):
+	lvl_one = screen_y + tile_y_topleft
+	lvl_two = screen_x + tile_x_topleft
+	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
+		if map[lvl_one][lvl_two][1] == 0:
+			if player_data != None:
+				map[lvl_one][lvl_two][3] = None
+			player_data = map[lvl_one][lvl_two]
+			player_data[3] = 1
 		
 
 print("WELCOME TO NUWAYOUT MAP MAKER!")
 response = input("Load existing map (Y) or create new one? (N)")
 if response == 'Y':
-	#Load existing map
-	sys.exit()
+	file_world_obj_path = input("Enter path to world file:\n")
+	file_robots_obj_path = input("Enter path to robots file:\n")
+	load()
 elif response != 'N':
 	sys.exit()
 else:
-	#Create new map
-	map = [] #Blank map currently
 	#MAP VALUES
 	# Map tile values are 3 digits each. This means the game can have up to 999
 	# distinct tiles! There is no delimiter between the tiles in the same row.
 	# However, a newline will be a delimiter between the rows themselves.
+	file_world_obj_path = input("Enter path to NEW world file:\n")
+	file_robots_obj_path = input("Enter path to NEW robots file:\n")
+	#Create new map
+	map = [] #Blank map currently
 	
 screen = pygame.display.set_mode((576, 432), 0, config.BIT_RESOLUTION)
 tile_x_topleft = 0
@@ -227,6 +353,7 @@ display_follower = 1
 mouse_right_down = False
 key_r_down = True
 key_h_down = True
+key_0_down = True
 
 while True:
 	#Display the follower tile by the mouse pointer
@@ -315,6 +442,18 @@ while True:
 		change_personality(map, x_pos_on_screen, y_pos_on_screen, 4)
 	elif keys[pygame.K_6]:
 		change_personality(map, x_pos_on_screen, y_pos_on_screen, 5)
+		
+	#0 Key will save the map to the files
+	if keys[pygame.K_0]:
+		if not key_0_down:
+			save()
+		key_0_down = True
+	else:
+		key_0_down = False
+		
+	#P Key will set the robot the mouser is on to be the player's robot
+	if keys[pygame.K_p]:
+		set_player_robot(map, x_pos_on_screen, y_pos_on_screen)
 				
 	#Render current background
 	render_full()

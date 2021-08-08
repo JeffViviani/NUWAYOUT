@@ -15,7 +15,7 @@ class Robot:
 		self.world = world
 		self.pagetable = pagetable
 		self.type = type
-		self.base_costume = (type - 1) * 5
+		self.base_costume = type * 5
 		self.costume = self.base_costume
 		self.target = None
 		self.path = None
@@ -154,7 +154,7 @@ class Robot:
 				if personality == 0:
 					#NO TARGET STATE
 					if self.target == None:
-						self.target = self.find_target(1, 0)
+						self.target = self.find_target(0, 0)
 						self.tick = 0
 					#HAS A TARGET STATE
 					else:
