@@ -24,6 +24,8 @@ tile_y_topleft = None
 map_width = 0
 map_height = 0
 
+map = None
+
 #Load all tiles into array
 tile_surfaces = [None] * 100
 
@@ -70,7 +72,7 @@ player_data = None
 ########## FUNCTIONS #################
 ######################################
 def render_full():
-	global screen, tile_x_topleft, tile_y_topleft
+	global screen, tile_x_topleft, tile_y_topleft, map
 	ref_tile_y = tile_y_topleft
 	frame = pygame.Rect(0, 0, 20, 20)
 	print_row = 0
@@ -82,18 +84,13 @@ def render_full():
 		while print_col < PRINT_WIDTH:
 			robot_to_blit = None
 			personality_to_blit = None
-			try:
-				if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
-					tile_to_blit = BLACK_TILE
-				else:
-					dat = map[ref_tile_y][ref_tile_x]
-					tile_to_blit = int(dat[0])
-					robot_to_blit = dat[1]
-					personality_to_blit = dat[2]
-			except TypeError:
-				print("ERROR!")
-				print(ref_tile_y)
-				print(ref_tile_x)
+			if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
+				tile_to_blit = BLACK_TILE
+			else:
+				dat = map[ref_tile_y][ref_tile_x]
+				tile_to_blit = int(dat[0])
+				robot_to_blit = dat[1]
+				personality_to_blit = dat[2]
 				
 			screen.blit(tile_surfaces[tile_to_blit], frame)
 			if robot_to_blit != None:
@@ -204,16 +201,17 @@ def int_to_3digit_str(num):
 #Save the map to a text file. 3 digits per tile. Newline to new row. Robots are
 #Saved to their own separate file.
 def save():
+	global file_world_obj_path, file_robots_obj_path
 	file_world = open(file_world_obj_path, 'w')
 	file_robots = open(file_robots_obj_path, 'w')
 	cnt_y = 0
+	length = 0
 	while cnt_y < map_height:
 		cnt_x = 0
 		while cnt_x < map_width:
 			tile_string = int_to_3digit_str(map[cnt_y][cnt_x][0])
 			file_world.write(tile_string)
 			if map[cnt_y][cnt_x][1] != None: # If a robot is on this tile
-				cursor = None
 				if map[cnt_y][cnt_x][3] == 1:
 					file_robots.seek(0,0)
 				file_robots.write(str(map[cnt_y][cnt_x][1])) #type
@@ -225,17 +223,19 @@ def save():
 				file_robots.write(str(cnt_y)) # y pos
 				file_robots.write('\n')
 				file_robots.seek(0,2)
+				length += 8
 			cnt_x += 1
 		if cnt_y != map_height - 1:
 			file_world.write('\n')
 		cnt_y += 1
 	file_world.close()
 	if file_robots.tell() > 0:
-		file_robots.seek(1,2)
-		file_robots.truncate()
+		file_robots.seek(length - 2,0)
+		#file_robots.truncate()
 	file_robots.close()
 	
 def load():
+	global map, file_world_obj_path, file_robots_obj_path, map_height, map_width
 	#Load world first then robots
 	file_world_obj = open(file_world_obj_path,'r')
 	file_robots_obj = open(file_robots_obj_path,'r')
@@ -263,6 +263,8 @@ def load():
 	file_world_obj.close()
 	map_height = len(map)
 	map_width = len(map[0])
+	print("map_height: " + str(map_height))
+	print("map width: " + str(map_width))
 	
 	#Load the robots
 	file_robots_obj.seek(0)
@@ -280,9 +282,11 @@ def load():
 				data_lst = map[items[3]][items[2]] # List pos of robot
 				data_lst[1] = items[0] #type
 				data_lst[2] = items[1] #personality
+				num_items = 0
 			num_str = ""
 		else:
 			num_str = num_str + c
+	file_robots_obj.close()
 		
 def plot_robot(arr, screen_x, screen_y, type):
 	lvl_one = screen_y + tile_y_topleft
@@ -451,7 +455,7 @@ while True:
 	else:
 		key_0_down = False
 		
-	#P Key will set the robot the mouser is on to be the player's robot
+	#P Key will set the robot the mouse is on to be the player's robot
 	if keys[pygame.K_p]:
 		set_player_robot(map, x_pos_on_screen, y_pos_on_screen)
 				
