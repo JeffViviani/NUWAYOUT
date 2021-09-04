@@ -1,15 +1,19 @@
 import sys
+import os
 sys.path.insert(1, 'modules/')
 import pygame
 import config
 import math
 
+LAST_TILE_FLOOR_FIX = None;
+LAST_TILE_FLOOR_ALT = None;
+LAST_TILE_WALL_FIX  = None;
+LAST_TILE_WALL_ALT  = None;
+
 PRINT_WIDTH = 29
 PRINT_HEIGHT = 23
 
-BLACK_TILE = 50
-TILE_CYCLE_JMP = 1 #After tile 1 it jumps to 50 when scrolling through the tiles.
-LAST_TILE = 51
+BLACK_TILE = 500
 
 pygame.init()
 pygame.mixer.init()
@@ -27,14 +31,7 @@ map_height = 0
 map = None
 
 #Load all tiles into array
-tile_surfaces = [None] * 100
-
-#Tile 50 is the breaking point. Tiles > 50 are ones robots cannot walk on.
-#Tiles <= 50 are ones robots can walk on.
-tile_surfaces[0] = pygame.image.load("Images/Tiles/tile0.png")
-tile_surfaces[1] = pygame.image.load("Images/Tiles/tile1.png")
-tile_surfaces[50] = pygame.image.load("Images/Tiles/tile50.png")
-tile_surfaces[51] = pygame.image.load("Images/Tiles/tile51.png")
+tile_surfaces = [None] * 999
 
 robot_surfaces = [None] * 3
 
@@ -67,6 +64,28 @@ file_robots_obj = None
 #on, this needs to be noted by changing the previously set player's robot to no
 #longer be the player robot. This pointer is helpful for that.
 player_data = None
+
+def file_roll_call(start_index):
+	global tile_surfaces
+
+	tile_index = start_index
+	while os.path.isfile("Images/Tiles/" + str(tile_index) + ".png"):
+		print("FILE FOUND! INDEX " + str(tile_index))
+		tile_surfaces[tile_index] = pygame.image.load("Images/Tiles/" + str(tile_index) + ".png")
+		tile_index += 1
+	tile_index -= 1
+	return tile_index
+	
+
+def load_tiles():
+	global tile_surfaces, LAST_TILE_FLOOR_FIX, LAST_TILE_FLOOR_ALT, LAST_TILE_WALL_FIX, LAST_TILE_WALL_ALT
+	tile_index = None
+	
+	# First determine the number of tiles of each category.
+	LAST_TILE_FLOOR_FIX = file_roll_call(0)
+	LAST_TILE_FLOOR_ALT = file_roll_call(250)
+	LAST_TILE_WALL_FIX  = file_roll_call(500)
+	LAST_TILE_WALL_ALT  = file_roll_call(750)
 
 ######################################
 ########## FUNCTIONS #################
@@ -319,6 +338,73 @@ def set_player_robot(arr, screen_x, screen_y):
 				map[lvl_one][lvl_two][3] = None
 			player_data = map[lvl_one][lvl_two]
 			player_data[3] = 1
+			
+def next_tile():
+	global current_tile
+	if current_tile == LAST_TILE_FLOOR_FIX:
+		if LAST_TILE_FLOOR_ALT >= 250:
+			current_tile = 250
+			return
+		else:
+			current_tile = LAST_TILE_FLOOR_ALT
+	if current_tile == LAST_TILE_FLOOR_ALT:
+		if LAST_TILE_WALL_FIX >= 500:
+			current_tile = 500
+			return
+		else:
+			current_tile = LAST_TILE_WALL_FIX
+	if current_tile == LAST_TILE_WALL_FIX:
+		if LAST_TILE_WALL_ALT >= 750:
+			current_tile = 750
+			return
+		else:
+			current_tile = LAST_TILE_WALL_ALT
+	if current_tile == LAST_TILE_WALL_ALT:
+		current_tile = 0
+		return
+	if current_tile < 249 or (current_tile >= 500 and current_tile < 750):
+		current_tile += 1
+	else:
+		current_tile += 2
+		
+def prev_tile():
+	global current_tile
+	
+	if current_tile == 0:
+		if LAST_TILE_WALL_ALT >= 750:
+			current_tile = LAST_TILE_WALL_ALT - 1
+		elif LAST_TILE_WALL_FIX >= 500:
+			current_tile = LAST_TILE_WALL_FIX
+		elif LAST_TILE_FLOOR_ALT >= 250:
+			current_tile = LAST_TILE_FLOOR_ALT - 1
+		else:
+			current_tile = LAST_TILE_FLOOR_FIX
+		return
+	
+	if current_tile == 250:
+		current_tile = LAST_TILE_FLOOR_FIX
+		return
+		
+	if current_tile == 500:
+		if LAST_TILE_FLOOR_ALT >= 250:
+			current_tile = LAST_TILE_FLOOR_ALT - 1
+		else:
+			current_tile = LAST_TILE_FLOOR_FIX
+		return
+		
+	if current_tile == 750:
+		if LAST_TILE_WALL_FIX >= 500:
+			current_tile = LAST_TILE_WALL_FIX
+		elif LAST_TILE_FLOOR_ALT >= 250:
+			current_tile = LAST_TILE_FLOOR_ALT - 1
+		else:
+			current_tile = LAST_TILE_FLOOR_FIX
+		return
+	
+	if current_tile < 249 or (current_tile >= 500 and current_tile < 750):
+		current_tile -= 1
+	else:
+		current_tile -= 2
 		
 
 print("WELCOME TO NUWAYOUT MAP MAKER!")
@@ -359,6 +445,12 @@ key_r_down = True
 key_h_down = True
 key_0_down = True
 
+cycle_delay = 20
+
+load_tiles()
+
+
+
 while True:
 	#Display the follower tile by the mouse pointer
 	mouse_pos = pygame.mouse.get_pos()
@@ -393,17 +485,39 @@ while True:
 		mouse_middle_down = False
 	if mouse_status[2] == True:
 		if not mouse_right_down:
-			mouse_right_down = True
-			if current_tile == TILE_CYCLE_JMP:
-				current_tile = BLACK_TILE
-			elif current_tile == LAST_TILE:
-				current_tile = 0
-			else:
-				current_tile += 1
+			cycle_delay = 15
+			next_tile()
+		elif cycle_delay == 0:
+			cycle_delay = 5
+			next_tile()
+		mouse_right_down = True
 	else:
 		mouse_right_down = False
 		
 	keys = pygame.key.get_pressed()
+	
+	if keys[pygame.K_RIGHT]:
+		if not key_right_down:
+			cycle_delay = 15
+			next_tile()
+		elif cycle_delay == 0:
+			cycle_delay = 5
+			next_tile()
+		key_right_down = True
+	else:
+		key_right_down = False
+		
+	if keys[pygame.K_LEFT]:
+		if not key_left_down:
+			cycle_delay = 15
+			prev_tile()
+		elif cycle_delay == 0:
+			cycle_delay = 5
+			prev_tile()
+		key_left_down = True
+	else:
+		key_right_down = False
+		
 	if keys[pygame.K_d]:
 		tile_x_topleft += 1
 		if area_fill_x1 != None:
@@ -455,6 +569,9 @@ while True:
 	else:
 		key_0_down = False
 		
+	if cycle_delay > 0:
+		cycle_delay -= 1
+		
 	#P Key will set the robot the mouse is on to be the player's robot
 	if keys[pygame.K_p]:
 		set_player_robot(map, x_pos_on_screen, y_pos_on_screen)
@@ -465,6 +582,7 @@ while True:
 	current_tile_frame.left = x_pos_on_screen * 20
 	current_tile_frame.top = y_pos_on_screen * 20
 	if display_follower == 1:
+		
 		screen.blit(tile_surfaces[current_tile], current_tile_frame)
 	clock.tick_busy_loop(60)
 	pygame.display.flip()
