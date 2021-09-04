@@ -1,5 +1,6 @@
 from math import floor
 from copy import deepcopy
+import os
 import pygame
 from filestream import *
 
@@ -23,11 +24,8 @@ class World:
 		self.scale_y = self.displayInfo.current_h / GAME_NATIVE_H
 		self.last_tile_x_init = None
 		self.last_tile_y_init = None
-		self.tile_surfaces = [None] * 100
-		self.tile_surfaces[0] = self.scale(pygame.image.load("Images/Tiles/tile0.png"))
-		self.tile_surfaces[1] = self.scale(pygame.image.load("Images/Tiles/tile1.png"))
-		self.tile_surfaces[50] = self.scale(pygame.image.load("Images/Tiles/tile50.png"))
-		self.tile_surfaces[51] = self.scale(pygame.image.load("Images/Tiles/tile51.png"))
+		self.tile_surfaces = [None] * 999
+		self.load_tiles()
 		self.tile_pixel_w = int(floor(20 * self.scale_x))
 		self.tile_pixel_h = int(floor(20 * self.scale_y))
 		self.camera_focus_offset_x = int(floor(0 - self.tile_pixel_w * 13.5))
@@ -40,7 +38,7 @@ class World:
 		self.bgnd_tiles, self.bgnd_tiles_width, self.bgnd_tiles_height = file_to_fake_2D_list_ints(file)
 		#print(len(self.bgnd_tiles))
 		self.occupancy = deepcopy(self.bgnd_tiles)
-		list_consolidate(self.occupancy, 1, 0, 9)
+		list_consolidate(self.occupancy, 499, 0, 9)
 		zero_list(self.occupancy)
 		
 	def scale(self, surface):
@@ -72,7 +70,7 @@ class World:
 				if index > 0 and index < len(self.bgnd_tiles):
 					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
 				else:
-					tile_to_blit = self.tile_surfaces[3]
+					tile_to_blit = self.tile_surfaces[500]
 				self.render_panel.blit(tile_to_blit, frame)
 				cnt = cnt + 1
 				index = index + self.bgnd_tiles_width
@@ -94,7 +92,7 @@ class World:
 				if index > 0 and index < len(self.bgnd_tiles):
 					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
 				else:
-					tile_to_blit = self.tile_surfaces[3]
+					tile_to_blit = self.tile_surfaces[500]
 				self.render_panel.blit(tile_to_blit, frame)
 				cnt = cnt + 1
 				index = index + self.bgnd_tiles_width
@@ -117,7 +115,7 @@ class World:
 				if index > 0 and index < len(self.bgnd_tiles):
 					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
 				else:
-					tile_to_blit = self.tile_surfaces[3]
+					tile_to_blit = self.tile_surfaces[500]
 				self.render_panel.blit(tile_to_blit, frame)
 				cnt = cnt + 1
 				index = index + 1
@@ -148,7 +146,7 @@ class World:
 
 	def render_full(self):
 		#Begin one tile to the left
-		dark_tile = self.tile_surfaces[50]
+		dark_tile = self.tile_surfaces[500]
 		#frame = self.frame
 		#frame_left_init = 0 - (self.camera_x % self.tile_pixel_w)
 		#frame.left = frame_left_init
@@ -158,11 +156,16 @@ class World:
 		frame.left = frame_left_init
 		frame.top = 0
 		
+		
+		
 		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
 		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
 		self.last_tile_x_pos_init = tile_x_pos_init
 		self.last_tile_y_pos_init = tile_y_pos_init
 		#print(len(self.bgnd_tiles))
+		
+		print("TILE X INIT: " + str(tile_x_pos_init))
+		print("TILE Y INIT: " + str(tile_y_pos_init))
 		
 		arr_index_init = 0
 		arr_jump_size = 0
@@ -318,8 +321,10 @@ class World:
 				else:
 					shadow_index = shadow_index + 1
 			else:
-				#print("Print tile at array index " + str(arr_index))
+				print("Print tile at array index " + str(arr_index))
+				
 				tile_to_blit = self.tile_surfaces[self.bgnd_tiles[arr_index]]
+				print("TILE " + str(self.bgnd_tiles[arr_index]))
 				arr_index = arr_index + 1
 			self.render_panel.blit(tile_to_blit, frame)
 			frame = frame.move(self.tile_pixel_w, 0)
@@ -339,6 +344,18 @@ class World:
 	def pan(self, x_shift, y_shift):
 		self.camera_x = self.camera_x + x_shift
 		self.camera_y = self.camera_y + y_shift
+		
+	def load_tiles(self):
+		self.file_roll_call(0)
+		self.file_roll_call(250)
+		self.file_roll_call(500)
+		self.file_roll_call(750)
+		
+	def file_roll_call(self, start_index):
+		tile_index = start_index
+		while os.path.isfile("Images/Tiles/" + str(tile_index) + ".png"):
+			self.tile_surfaces[tile_index] = self.scale(pygame.image.load("Images/Tiles/" + str(tile_index) + ".png"))
+			tile_index += 1
 
 def zero_list(lst):
 	for i in lst:

@@ -30,6 +30,9 @@ map_height = 0
 
 map = None
 
+cnt_alt = 30
+alt_state = False
+
 #Load all tiles into array
 tile_surfaces = [None] * 999
 
@@ -108,9 +111,12 @@ def render_full():
 			else:
 				dat = map[ref_tile_y][ref_tile_x]
 				tile_to_blit = int(dat[0])
+				if tile_to_blit >= 250 and tile_to_blit < 500 or tile_to_blit >= 750:
+					if alt_state:
+						tile_to_blit += 1
 				robot_to_blit = dat[1]
 				personality_to_blit = dat[2]
-				
+			
 			screen.blit(tile_surfaces[tile_to_blit], frame)
 			if robot_to_blit != None:
 				screen.blit(robot_surfaces[robot_to_blit], frame)
@@ -210,7 +216,8 @@ def int_to_3digit_str(num):
 	num_str = str(num)
 	if len(num_str) < 3:
 		cnt = 0
-		while cnt < 3 - len(num_str):
+		cnt_max = 3 - len(num_str)
+		while cnt < cnt_max:
 			num_str = '0' + num_str
 			cnt += 1
 	elif len(num_str) > 3:
@@ -330,6 +337,7 @@ def change_personality(arr, screen_x, screen_y, type):
 			current_personality = map[lvl_one][lvl_two][2] = type
 			
 def set_player_robot(arr, screen_x, screen_y):
+	global player_data
 	lvl_one = screen_y + tile_y_topleft
 	lvl_two = screen_x + tile_x_topleft
 	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
@@ -347,7 +355,7 @@ def next_tile():
 			return
 		else:
 			current_tile = LAST_TILE_FLOOR_ALT
-	if current_tile == LAST_TILE_FLOOR_ALT:
+	if current_tile == LAST_TILE_FLOOR_ALT or current_tile == LAST_TILE_FLOOR_ALT - 1:
 		if LAST_TILE_WALL_FIX >= 500:
 			current_tile = 500
 			return
@@ -359,7 +367,7 @@ def next_tile():
 			return
 		else:
 			current_tile = LAST_TILE_WALL_ALT
-	if current_tile == LAST_TILE_WALL_ALT:
+	if current_tile == LAST_TILE_WALL_ALT or current_tile == LAST_TILE_WALL_ALT - 1:
 		current_tile = 0
 		return
 	if current_tile < 249 or (current_tile >= 500 and current_tile < 750):
@@ -412,6 +420,7 @@ response = input("Load existing map (Y) or create new one? (N)")
 if response == 'Y':
 	file_world_obj_path = input("Enter path to world file:\n")
 	file_robots_obj_path = input("Enter path to robots file:\n")
+	load_tiles()
 	load()
 elif response != 'N':
 	sys.exit()
@@ -422,6 +431,8 @@ else:
 	# However, a newline will be a delimiter between the rows themselves.
 	file_world_obj_path = input("Enter path to NEW world file:\n")
 	file_robots_obj_path = input("Enter path to NEW robots file:\n")
+	
+	load_tiles()
 	#Create new map
 	map = [] #Blank map currently
 	
@@ -444,11 +455,10 @@ mouse_right_down = False
 key_r_down = True
 key_h_down = True
 key_0_down = True
+key_right_down = True
+key_left_down = True
 
 cycle_delay = 20
-
-load_tiles()
-
 
 
 while True:
@@ -516,7 +526,7 @@ while True:
 			prev_tile()
 		key_left_down = True
 	else:
-		key_right_down = False
+		key_left_down = False
 		
 	if keys[pygame.K_d]:
 		tile_x_topleft += 1
@@ -575,6 +585,13 @@ while True:
 	#P Key will set the robot the mouse is on to be the player's robot
 	if keys[pygame.K_p]:
 		set_player_robot(map, x_pos_on_screen, y_pos_on_screen)
+		
+	#Variables for alternating tiles
+	if cnt_alt == 0:
+		alt_state = not alt_state
+		cnt_alt = 30
+	else:
+		cnt_alt -= 1
 				
 	#Render current background
 	render_full()
