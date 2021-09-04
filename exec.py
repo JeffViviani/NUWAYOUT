@@ -534,7 +534,7 @@ while True:
 			render_page(pagetable, your_robot.page_row+1, your_robot.page_col+1)
 			
 			#Render the health bar
-			health_bar_inner_rect.width = health_bar_inner_widths[your_robot.health]			
+			health_bar_inner_rect.width = health_bar_inner_widths[your_robot.health]
 			pygame.draw.rect(screen, (0,0,0), health_bar_outer_rect)
 			pygame.draw.rect(screen, (72,212,51), health_bar_inner_rect)
 			

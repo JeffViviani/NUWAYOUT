@@ -79,12 +79,14 @@ class Laser:
 		
 	def automated_control(self):
 	
+		print("STARTING AT TILE " + str(self.tile_x))
+	
 		if self.direction == 0:
 			if self.tile_x >= self.disperse_tile:
 				self.disperse = True
 				return
 			old_tile = self.tile_x
-			tile_max_extend = self.tile_x + 3
+			tile_max_extend = self.tile_x + 1
 			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend > self.world.bgnd_tiles_width:
 				self.disperse = True
@@ -111,7 +113,7 @@ class Laser:
 				self.disperse = True
 				return
 			old_tile = self.tile_y
-			tile_max_extend = self.tile_y + 3
+			tile_max_extend = self.tile_y + 1
 			num_rows = self.world.bgnd_tiles_width
 			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend > num_rows:
@@ -139,7 +141,7 @@ class Laser:
 				self.disperse = True
 				return
 			old_tile = self.tile_x
-			tile_max_extend = self.tile_x - 3
+			tile_max_extend = self.tile_x - 1
 			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend < 0:
 				self.disperse = True
@@ -166,7 +168,7 @@ class Laser:
 				self.disperse = True
 				return
 			old_tile = self.tile_y
-			tile_max_extend = self.tile_y - 3
+			tile_max_extend = self.tile_y - 1
 			index = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
 			if tile_max_extend < 0:
 				self.disperse = True
