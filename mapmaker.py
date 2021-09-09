@@ -13,7 +13,7 @@ LAST_TILE_WALL_ALT  = None;
 PRINT_WIDTH = 29
 PRINT_HEIGHT = 23
 
-BLACK_TILE = 500
+BLACK_TILE = 250
 
 pygame.init()
 pygame.mixer.init()
@@ -111,7 +111,7 @@ def render_full():
 			else:
 				dat = map[ref_tile_y][ref_tile_x]
 				tile_to_blit = int(dat[0])
-				if tile_to_blit >= 250 and tile_to_blit < 500 or tile_to_blit >= 750:
+				if tile_to_blit >= 500:
 					if alt_state:
 						tile_to_blit += 1
 				robot_to_blit = dat[1]
@@ -318,7 +318,8 @@ def plot_robot(arr, screen_x, screen_y, type):
 	lvl_one = screen_y + tile_y_topleft
 	lvl_two = screen_x + tile_x_topleft
 	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
-		if map[lvl_one][lvl_two][0] < BLACK_TILE:
+		tmp = map[lvl_one][lvl_two][0]
+		if tmp < 250 or (tmp >= 500 and tmp < 750):
 			current_robot = map[lvl_one][lvl_two][1]
 			if current_robot == None:
 				map[lvl_one][lvl_two][1] = 0
@@ -370,7 +371,7 @@ def next_tile():
 	if current_tile == LAST_TILE_WALL_ALT or current_tile == LAST_TILE_WALL_ALT - 1:
 		current_tile = 0
 		return
-	if current_tile < 249 or (current_tile >= 500 and current_tile < 750):
+	if current_tile < 500:
 		current_tile += 1
 	else:
 		current_tile += 2
