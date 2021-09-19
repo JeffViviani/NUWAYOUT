@@ -229,7 +229,7 @@ while True:
 			if keys[pygame.K_DOWN]:
 				world.pan(0,8)
 					
-		world.render_full()
+		world.render_full(False)
 		render_page(pagetable, 0, 0)
 		render_page(pagetable, 0, 1)
 		pygame.display.flip()
@@ -296,7 +296,7 @@ while True:
 					menu_scroll_state = 0
 						
 			clock.tick(30)
-			world.render_full()
+			world.render_full(False)
 			render_page(pagetable, 0, 0)
 			render_page(pagetable, 0, 1)
 			screen.blit(title_surface, title_frame)
@@ -471,7 +471,7 @@ while True:
 		fire_cooldown = 0
 		
 		world.focus_camera(your_robot)
-		world.render_full()
+		world.render_full(True)
 		
 		while game_state == 4:
 			for event in pygame.event.get():

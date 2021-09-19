@@ -62,14 +62,16 @@ def file_to_1D_list(file):
 			item = item + str(c)
 	return lst
 
-#Takes an any-dimensional list and replaces all instances of values <= 'top' with 'value'. All other values are
+#Takes an any-dimensional list and replaces all instances of values where func(value) returns True with 'value'. All other values are
 #changed to 'ow'.
-def list_consolidate(lst, top, value, ow):
+#
+# func is a function to be passed to this function.
+def list_consolidate(lst, func, value, ow):
 	for item in range(len(lst)):
 		if isinstance(lst[item], list):
 			list_consolidate(lst[item], target, value, ow)
 		elif isinstance(item, int):
-			if lst[item] <= top:
+			if func(lst[item]):
 				lst[item] = value
 			else:
 				lst[item] = ow

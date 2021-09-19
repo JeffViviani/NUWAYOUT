@@ -5,10 +5,10 @@ import pygame
 import config
 import math
 
-LAST_TILE_FLOOR_FIX = None;
-LAST_TILE_FLOOR_ALT = None;
-LAST_TILE_WALL_FIX  = None;
-LAST_TILE_WALL_ALT  = None;
+SET_1 = None;
+SET_2 = None;
+SET_3 = None;
+SET_4 = None;
 
 PRINT_WIDTH = 29
 PRINT_HEIGHT = 23
@@ -81,14 +81,14 @@ def file_roll_call(start_index):
 	
 
 def load_tiles():
-	global tile_surfaces, LAST_TILE_FLOOR_FIX, LAST_TILE_FLOOR_ALT, LAST_TILE_WALL_FIX, LAST_TILE_WALL_ALT
+	global tile_surfaces, SET_1, SET_2, SET_3, SET_4
 	tile_index = None
 	
 	# First determine the number of tiles of each category.
-	LAST_TILE_FLOOR_FIX = file_roll_call(0)
-	LAST_TILE_FLOOR_ALT = file_roll_call(250)
-	LAST_TILE_WALL_FIX  = file_roll_call(500)
-	LAST_TILE_WALL_ALT  = file_roll_call(750)
+	SET_1 = file_roll_call(0)
+	SET_2 = file_roll_call(250)
+	SET_3  = file_roll_call(500)
+	SET_4  = file_roll_call(750)
 
 ######################################
 ########## FUNCTIONS #################
@@ -349,26 +349,26 @@ def set_player_robot(arr, screen_x, screen_y):
 			player_data[3] = 1
 			
 def next_tile():
-	global current_tile
-	if current_tile == LAST_TILE_FLOOR_FIX:
-		if LAST_TILE_FLOOR_ALT >= 250:
+	global current_tile, SET_1, SET_2, SET_3, SET_4
+	if current_tile == SET_1:
+		if SET_2 >= 250:
 			current_tile = 250
 			return
 		else:
-			current_tile = LAST_TILE_FLOOR_ALT
-	if current_tile == LAST_TILE_FLOOR_ALT or current_tile == LAST_TILE_FLOOR_ALT - 1:
-		if LAST_TILE_WALL_FIX >= 500:
+			current_tile = SET_2
+	if current_tile == SET_2:
+		if SET_3 >= 500:
 			current_tile = 500
 			return
 		else:
-			current_tile = LAST_TILE_WALL_FIX
-	if current_tile == LAST_TILE_WALL_FIX:
-		if LAST_TILE_WALL_ALT >= 750:
+			current_tile = SET_3 - 1
+	if current_tile == SET_3 - 1:
+		if SET_4 >= 750:
 			current_tile = 750
 			return
 		else:
-			current_tile = LAST_TILE_WALL_ALT
-	if current_tile == LAST_TILE_WALL_ALT or current_tile == LAST_TILE_WALL_ALT - 1:
+			current_tile = SET_4 - 1
+	if current_tile == SET_4 - 1:
 		current_tile = 0
 		return
 	if current_tile < 500:
@@ -377,40 +377,40 @@ def next_tile():
 		current_tile += 2
 		
 def prev_tile():
-	global current_tile
+	global current_tile, SET_1, SET_2, SET_3, SET_4
 	
 	if current_tile == 0:
-		if LAST_TILE_WALL_ALT >= 750:
-			current_tile = LAST_TILE_WALL_ALT - 1
-		elif LAST_TILE_WALL_FIX >= 500:
-			current_tile = LAST_TILE_WALL_FIX
-		elif LAST_TILE_FLOOR_ALT >= 250:
-			current_tile = LAST_TILE_FLOOR_ALT - 1
+		if SET_4 >= 750:
+			current_tile = SET_4 - 1
+		elif SET_3 >= 500:
+			current_tile = SET_3 - 1
+		elif SET_2 >= 250:
+			current_tile = SET_2 - 1
 		else:
-			current_tile = LAST_TILE_FLOOR_FIX
+			current_tile = SET_1
 		return
 	
 	if current_tile == 250:
-		current_tile = LAST_TILE_FLOOR_FIX
+		current_tile = SET_1
 		return
 		
 	if current_tile == 500:
-		if LAST_TILE_FLOOR_ALT >= 250:
-			current_tile = LAST_TILE_FLOOR_ALT - 1
+		if SET_2 >= 250:
+			current_tile = SET_2 - 1
 		else:
-			current_tile = LAST_TILE_FLOOR_FIX
+			current_tile = SET_1
 		return
 		
 	if current_tile == 750:
-		if LAST_TILE_WALL_FIX >= 500:
-			current_tile = LAST_TILE_WALL_FIX
-		elif LAST_TILE_FLOOR_ALT >= 250:
-			current_tile = LAST_TILE_FLOOR_ALT - 1
+		if SET_3 >= 500:
+			current_tile = SET_3
+		elif SET_2 >= 250:
+			current_tile = SET_2 - 1
 		else:
-			current_tile = LAST_TILE_FLOOR_FIX
+			current_tile = SET_1
 		return
 	
-	if current_tile < 249 or (current_tile >= 500 and current_tile < 750):
+	if current_tile < 500:
 		current_tile -= 1
 	else:
 		current_tile -= 2

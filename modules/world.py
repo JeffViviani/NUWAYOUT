@@ -32,14 +32,19 @@ class World:
 		self.camera_focus_offset_y = int(floor(0 - self.tile_pixel_h * 10.5))
 		self.frame = pygame.Rect(0, 0, self.tile_pixel_w, self.tile_pixel_h)
 		self.render_panel = pygame.Surface((self.tile_pixel_w * PRINT_WIDTH, self.tile_pixel_h * PRINT_HEIGHT))
+		self.render_panel_alt = self.render_panel.copy()
 		self.render_panel_temp = self.render_panel.copy()
+		self.alt_cnt = 0
 		
 	def load_world(self, file):
 		self.bgnd_tiles, self.bgnd_tiles_width, self.bgnd_tiles_height = file_to_fake_2D_list_ints(file)
 		#print(len(self.bgnd_tiles))
 		self.occupancy = deepcopy(self.bgnd_tiles)
-		list_consolidate(self.occupancy, 499, 0, 9)
-		zero_list(self.occupancy)
+		list_consolidate(self.occupancy, self.wall_condition, 9, 0)
+		#zero_list(self.occupancy)
+		
+	def wall_condition(self, tile_num):
+		return (tile_num >= 250 and tile_num < 500 or tile_num >= 750)
 		
 	def scale(self, surface):
 		current_w = surface.get_width()
@@ -53,25 +58,42 @@ class World:
 	def render_partial(self):
 		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
 		tile_x_pos_init = int(floor(self.camera_x / self.tile_pixel_w))
+		
+		self.alt_cnt += 1
+		if self.alt_cnt == 30:
+			self.alt_cnt = 0
+		
+		# If we have gone to the right one column...
 		if tile_x_pos_init > self.last_tile_x_pos_init:
 			self.last_tile_x_pos_init = tile_x_pos_init
 			#Shift the render_pane one tile to the left
 			self.render_panel_temp.blit(self.render_panel, (0 - self.tile_pixel_w, 0))
 			self.render_panel.blit(self.render_panel_temp, (0,0))
+			self.render_panel_temp.blit(self.render_panel_alt, (0 - self.tile_pixel_w, 0))
+			self.render_panel_alt.blit(self.render_panel_temp, (0,0))
 			#Render the new rightmost column
 			index = self.bgnd_tiles_width * tile_y_pos_init + tile_x_pos_init + PRINT_WIDTH - 1
 			frame = self.frame
 			frame.left = self.tile_pixel_w * (PRINT_WIDTH - 1)
 			frame.top = 0
 			
+			
+			
 			cnt = 0
 			while(cnt < PRINT_HEIGHT):
 				tile_to_blit = None
+				tile_to_blit_alt = None
 				if index > 0 and index < len(self.bgnd_tiles):
-					tile_to_blit = self.tile_surfaces[self.bgnd_tiles[index]]
+					tile_index = self.bgnd_tiles[index]
+					tile_to_blit = self.tile_surfaces[tile_index]
+					if tile_index < 500:
+						tile_to_blit_alt = tile_to_blit
+					else:
+						tile_to_blit_alt = self.tile_surfaces[tile_index + 1]
 				else:
-					tile_to_blit = self.tile_surfaces[500]
+					tile_to_blit = self.tile_surfaces[250]
 				self.render_panel.blit(tile_to_blit, frame)
+				self.render_panel_alt.blit(tile_to_blit_alt, frame)
 				cnt = cnt + 1
 				index = index + self.bgnd_tiles_width
 				frame.top = frame.top + self.tile_pixel_h
@@ -142,11 +164,19 @@ class World:
 				cnt = cnt + 1
 				index = index + 1
 				frame.left = frame.left + self.tile_pixel_w
-		self.screen.blit(self.render_panel, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
+		if self.alt_cnt < 15:
+			self.screen.blit(self.render_panel, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
+		else:
+			self.screen.blit(self.render_panel_alt, (0 - self.camera_x % self.tile_pixel_w, 0 - self.camera_y % self.tile_pixel_h))
 
-	def render_full(self):
+	def render_full(self, first_time):
+	
+		self.alt_cnt += 1
+		if self.alt_cnt == 30:
+			self.alt_cnt = 0
+	
 		#Begin one tile to the left
-		dark_tile = self.tile_surfaces[500]
+		dark_tile = self.tile_surfaces[250]
 		#frame = self.frame
 		#frame_left_init = 0 - (self.camera_x % self.tile_pixel_w)
 		#frame.left = frame_left_init
@@ -308,12 +338,14 @@ class World:
 					
 		index = 0
 		arr_index = arr_index_init
+		tile_index_alt = None
 		#print("START")
 		while True:
 			#print("Index: " + str(index))
 			if index == shadow_index:
 				#print("SHADOW!")
 				tile_to_blit = dark_tile
+				tile_index_alt = 250
 				if shadow_index == shadow_jump_index:
 					#print("SHADOW JUMPS! By value " + str(shadow_jump_amnt))
 					shadow_jump_index = shadow_index + PRINT_WIDTH
@@ -321,12 +353,18 @@ class World:
 				else:
 					shadow_index = shadow_index + 1
 			else:
-				print("Print tile at array index " + str(arr_index))
-				
-				tile_to_blit = self.tile_surfaces[self.bgnd_tiles[arr_index]]
-				print("TILE " + str(self.bgnd_tiles[arr_index]))
+				tile_index = self.bgnd_tiles[arr_index]
+				tile_index_alt = tile_index
+				if tile_index >= 500:
+					tile_index_alt += 1
+					if self.alt_cnt >= 15:
+						tile_index += 1
+				tile_to_blit = self.tile_surfaces[tile_index]
 				arr_index = arr_index + 1
 			self.render_panel.blit(tile_to_blit, frame)
+			if first_time:
+				tile_to_blit_alt = self.tile_surfaces[tile_index_alt]
+				self.render_panel_alt.blit(tile_to_blit_alt, frame)
 			frame = frame.move(self.tile_pixel_w, 0)
 			index = index + 1
 			if index == newline_index:
