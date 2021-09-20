@@ -460,10 +460,8 @@ while True:
 		pygame.mixer.music.load("Audio/RampantNoiseEqualized.mp3")
 		pygame.mixer.music.play(-1)
 		
-		print(world.bgnd_tiles)
 		world.load_world("data/world" + str(level) + ".txt")
 		pagetable.load_blank(world)
-		print(world.bgnd_tiles)
 		your_robot = load_robots(world, pagetable, "data/robots" + str(level) + ".txt")
 		#print("YOUR ROBOT ID: " + str(hex(id(your_robot))))
 		your_robot.ai = False

@@ -79,8 +79,6 @@ class Laser:
 		
 	def automated_control(self):
 	
-		print("STARTING AT TILE " + str(self.tile_x))
-	
 		if self.direction == 0:
 			if self.tile_x >= self.disperse_tile:
 				self.disperse = True
