@@ -10,6 +10,8 @@ GAME_NATIVE_H = 432.0
 PRINT_WIDTH = 30
 PRINT_HEIGHT = 23
 
+coin_frame = pygame.Rect
+
 class World:
 	def __init__(self, screen):
 		self.screen = screen
@@ -424,6 +426,14 @@ class World:
 		while os.path.isfile("Images/Tiles/" + str(tile_index) + ".png"):
 			self.tile_surfaces[tile_index] = self.scale(pygame.image.load("Images/Tiles/" + str(tile_index) + ".png"))
 			tile_index += 1
+			
+	def coin_set(self, row, col):
+		# Set tile occupancy to 8 to indicate there is a coin on that tile.
+		self.occupancy[row * self.bgnd_tiles_width + col] = 8
+		
+	def coin_unset(self, row, col)
+		# Set tile occupancy to 8 to indicate the tile is movable and blank
+		self.occupancy[row * self.bgnd_tiles_width + col] = 0
 
 def zero_list(lst):
 	for i in lst:
