@@ -345,7 +345,7 @@ class Robot:
 			self.point_right()
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x + 1] == 0:
+				if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x + 1] < 9:
 					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_x = self.tile_x + 1
 					self.dest_x = self.x + self.world.tile_pixel_w
@@ -363,7 +363,7 @@ class Robot:
 			self.point_down()
 			#If free to move
 			try:
-				if self.world.occupancy[(self.tile_y + 1) * self.world.bgnd_tiles_width + self.tile_x] == 0:
+				if self.world.occupancy[(self.tile_y + 1) * self.world.bgnd_tiles_width + self.tile_x] < 9:
 					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_y = self.tile_y + 1
 					self.dest_y = self.y + self.world.tile_pixel_h
@@ -382,7 +382,7 @@ class Robot:
 			self.point_left()
 			#If free to move
 			try:
-				if self.tile_x >= 1 and self.world.occupancy[(self.tile_y * self.world.bgnd_tiles_width) + self.tile_x - 1] == 0:
+				if self.tile_x >= 1 and self.world.occupancy[(self.tile_y * self.world.bgnd_tiles_width) + self.tile_x - 1] < 9:
 					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_x = self.tile_x - 1
 					self.dest_x = self.x - self.world.tile_pixel_w
@@ -401,7 +401,7 @@ class Robot:
 			self.point_up()
 			#If free to move
 			try:
-				if self.tile_y >= 1 and self.world.occupancy[(self.tile_y - 1)*self.world.bgnd_tiles_width + self.tile_x] == 0:
+				if self.tile_y >= 1 and self.world.occupancy[(self.tile_y - 1)*self.world.bgnd_tiles_width + self.tile_x] < 9:
 					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 					self.tile_y = self.tile_y - 1
 					self.dest_y = self.y - self.world.tile_pixel_h

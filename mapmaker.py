@@ -51,6 +51,8 @@ personality_dots[3] = pygame.image.load("Images/Robots/Personality_Dots/3.png")
 personality_dots[4] = pygame.image.load("Images/Robots/Personality_Dots/4.png")
 personality_dots[5] = pygame.image.load("Images/Robots/Personality_Dots/5.png")
 
+coin0 = pygame.image.load("Images/coin0.png")
+
 displayInfo = pygame.display.Info()
 screen_width = displayInfo.current_w
 screen_height = displayInfo.current_h
@@ -106,6 +108,7 @@ def render_full():
 		while print_col < PRINT_WIDTH:
 			robot_to_blit = None
 			personality_to_blit = None
+			coin_status = None
 			if ref_tile_x < 0 or ref_tile_y < 0 or ref_tile_y >= len(map) or ref_tile_x >= len(map[ref_tile_y]):
 				tile_to_blit = BLACK_TILE
 			else:
@@ -116,11 +119,19 @@ def render_full():
 						tile_to_blit += 1
 				robot_to_blit = dat[1]
 				personality_to_blit = dat[2]
+				coin_status = dat[4]
 			
 			screen.blit(tile_surfaces[tile_to_blit], frame)
 			if robot_to_blit != None:
+				print(robot_to_blit)
 				screen.blit(robot_surfaces[robot_to_blit], frame)
 				screen.blit(personality_dots[personality_to_blit], frame)
+			elif coin_status == 1:
+					frame.left += 4
+					frame.top += 4
+					screen.blit(coin0, frame)
+					frame.left -= 4
+					frame.top -= 4
 			frame.left += 20
 			print_col += 1
 			ref_tile_x += 1
@@ -139,7 +150,7 @@ def plot(arr, screen_x, screen_y, data):
 			arr.append([])
 			fill_cnt = 0
 			while fill_cnt < map_width:
-				arr[len(arr) - 1].append([BLACK_TILE, None, None, None])
+				arr[len(arr) - 1].append([BLACK_TILE, None, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_height = lvl_one + 1
@@ -150,7 +161,7 @@ def plot(arr, screen_x, screen_y, data):
 			arr.insert(0,[])
 			fill_cnt = 0
 			while fill_cnt < map_width:
-				arr[0].append([BLACK_TILE, None, None, None])
+				arr[0].append([BLACK_TILE, None, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_height = len(arr)
@@ -164,7 +175,7 @@ def plot(arr, screen_x, screen_y, data):
 		while cnt < cnt_max:
 			fill_cnt = 0
 			while fill_cnt < fill_cnt_max:
-				arr[cnt].append([BLACK_TILE, None, None, None])
+				arr[cnt].append([BLACK_TILE, None, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_width = lvl_two + 1
@@ -175,14 +186,14 @@ def plot(arr, screen_x, screen_y, data):
 		while cnt < cnt_max:
 			fill_cnt = 0
 			while fill_cnt < fill_cnt_max:
-				arr[cnt].insert(0,[BLACK_TILE, None, None, None])
+				arr[cnt].insert(0,[BLACK_TILE, None, None, None, None])
 				fill_cnt += 1
 			cnt += 1
 		map_width = map_width - lvl_two
 		tile_x_topleft -= lvl_two
 		lvl_two = 0
 		
-	arr[lvl_one][lvl_two] = [data, None, None, None]
+	arr[lvl_one][lvl_two] = [data, None, None, None, None]
 		
 def plot_area(arr, screen_x_1, screen_y_1, screen_x_2, screen_y_2, data):
 	cnt_y_max = abs(screen_y_1 - screen_y_2)
@@ -250,6 +261,18 @@ def save():
 				file_robots.write('\n')
 				file_robots.seek(0,2)
 				length += 8
+			elif map[cnt_y][cnt_x][4] != None:
+				#Write Coin
+				file_robots.write("99") #Coin
+				file_robots.write('\n')
+				file_robots.write("0") #N/A
+				file_robots.write('\n')
+				file_robots.write(str(cnt_x)) # x pos
+				file_robots.write('\n')
+				file_robots.write(str(cnt_y)) # y pos
+				file_robots.write('\n')
+				file_robots.seek(0,2)
+				length += 8
 			cnt_x += 1
 		if cnt_y != map_height - 1:
 			file_world.write('\n')
@@ -284,7 +307,7 @@ def load():
 			digits_read += 1
 			if digits_read == 3:
 				num_str = digits[0] + digits[1] + digits[2]
-				map[height - 1].append([int(num_str), None, None, None])
+				map[height - 1].append([int(num_str), None, None, None, None])
 				digits_read = 0
 	file_world_obj.close()
 	map_height = len(map)
@@ -308,6 +331,13 @@ def load():
 				data_lst = map[items[3]][items[2]] # List pos of robot
 				data_lst[1] = items[0] #type
 				data_lst[2] = items[1] #personality
+				
+				if data_lst[1] == 99:
+					#coin
+					data_lst[1] = None
+					data_lst[2] = None
+					data_lst[4] = 1
+				
 				num_items = 0
 			num_str = ""
 		else:
@@ -320,15 +350,32 @@ def plot_robot(arr, screen_x, screen_y, type):
 	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
 		tmp = map[lvl_one][lvl_two][0]
 		if tmp < 250 or (tmp >= 500 and tmp < 750):
-			current_robot = map[lvl_one][lvl_two][1]
-			if current_robot == None:
-				map[lvl_one][lvl_two][1] = 0
-				map[lvl_one][lvl_two][2] = 0
-			elif current_robot == 1:
-				map[lvl_one][lvl_two][1] = None
+			coin_status = map[lvl_one][lvl_two][4]
+			if coin_status == None:
+				current_robot = map[lvl_one][lvl_two][1]
+				if current_robot == None:
+					map[lvl_one][lvl_two][1] = 0
+					map[lvl_one][lvl_two][2] = 0
+				elif current_robot == 1:
+					map[lvl_one][lvl_two][1] = None
+				else:
+					current_robot += 1
+					map[lvl_one][lvl_two][1] = current_robot
+				
+def toggle_coin(arr, screen_x, screen_y):
+	lvl_one = screen_y + tile_y_topleft
+	lvl_two = screen_x + tile_x_topleft
+	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
+		tmp = map[lvl_one][lvl_two][0]
+		if tmp < 250 or (tmp >= 500 and tmp < 750):
+			tmp2 = map[lvl_one][lvl_two]
+			if tmp2[4] == None:
+				tmp2[4] = 1
 			else:
-				current_robot += 1
-				map[lvl_one][lvl_two][1] = current_robot
+				tmp2[4] = None
+			tmp2[3] = None
+			tmp2[2] = None
+			tmp2[1] = None
 				
 def change_personality(arr, screen_x, screen_y, type):
 	lvl_one = screen_y + tile_y_topleft
@@ -455,6 +502,7 @@ display_follower = 1
 mouse_right_down = False
 key_r_down = True
 key_h_down = True
+key_c_down = True
 key_0_down = True
 key_right_down = True
 key_left_down = True
@@ -558,6 +606,14 @@ while True:
 		key_h_down = True
 	else:
 		key_h_down = False
+		
+	#0 Key will save the map to the files
+	if keys[pygame.K_c]:
+		if not key_c_down:
+			toggle_coin(map, x_pos_on_screen, y_pos_on_screen)
+		key_c_down = True
+	else:
+		key_c_down = False
 		
 	if keys[pygame.K_1]:
 		change_personality(map, x_pos_on_screen, y_pos_on_screen, 0)

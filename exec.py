@@ -35,6 +35,7 @@ from math import floor
 #   represents a single robot's spawn information. It is arranged as such:
 #
 #   type
+#   personality
 #   tile_x
 #   tile_y
 #
@@ -60,12 +61,17 @@ def load_robots(world, pagetable, file):
 	num_items = len(robot_list)
 	item = 0
 	first = 0
+	new_robot = None
 	firstRef = None
 	while item < num_items:
-		new_robot = Robot(world, pagetable, robot_list[item],
-		                  robot_list[item + 1], robot_list[item + 2], robot_list[item + 3])
+		if robot_list[item] == 99:
+			#Load coin
+			world.occupancy[world.bgnd_tiles_width * robot_list[item + 3] + robot_list[item + 2]] = 8
+		else:
+			#Load robot
+			new_robot = Robot(world, pagetable, robot_list[item], robot_list[item + 1], robot_list[item + 2], robot_list[item + 3])
 		item = item + 4
-		if first == 0:
+		if first == 0 and new_robot != None:
 			first = 1
 			firstRef = new_robot
 	return firstRef

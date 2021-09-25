@@ -10,8 +10,6 @@ GAME_NATIVE_H = 432.0
 PRINT_WIDTH = 30
 PRINT_HEIGHT = 23
 
-coin_frame = pygame.Rect
-
 class World:
 	def __init__(self, screen):
 		self.screen = screen
@@ -36,6 +34,13 @@ class World:
 		self.render_panel = pygame.Surface((self.tile_pixel_w * PRINT_WIDTH, self.tile_pixel_h * PRINT_HEIGHT))
 		self.render_panel_alt = self.render_panel.copy()
 		self.render_panel_temp = self.render_panel.copy()
+		self.coin_frame = pygame.Rect(0, 0, int(floor(12 * self.scale_x)), int(floor(12 * self.scale_y)))
+		self.box_temp = pygame.Surface((int(floor(20 * self.scale_x)), int(floor(20 * self.scale_y))))
+		self.box_temp2 = self.box_temp.copy()
+		self.coin_offset_x = int(floor(4 * self.scale_x))
+		self.coin_offset_y = int(floor(4 * self.scale_y))
+		self.coin0 = self.scale(pygame.image.load("Images/coin0.png"))
+		self.coin1 = self.scale(pygame.image.load("Images/coin1.png"))
 		self.alt_cnt = 0
 		
 	def load_world(self, file):
@@ -92,6 +97,16 @@ class World:
 						tile_to_blit_alt = tile_to_blit
 					else:
 						tile_to_blit_alt = self.tile_surfaces[tile_index + 1]
+						
+					if self.occupancy[index] == 8:
+						#Coin
+						self.box_temp.blit(tile_to_blit, (0,0))
+						self.box_temp.blit(self.coin0, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit = self.box_temp
+						
+						self.box_temp2.blit(tile_to_blit_alt, (0,0))
+						self.box_temp2.blit(self.coin1, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit_alt = self.box_temp2
 				else:
 					tile_to_blit = self.tile_surfaces[250]
 					tile_to_blit_alt = tile_to_blit
@@ -191,6 +206,18 @@ class World:
 						tile_to_blit_alt = tile_to_blit
 					else:
 						tile_to_blit_alt = self.tile_surfaces[tile_index + 1]
+					if self.occupancy[index] == 8:
+					
+						#Coin
+						box_temp.blit(tile_to_blit, (0,0))
+						box_temp.blit(self.coin0, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit = box_temp
+						
+						box_temp2.blit(tile_to_blit_alt, (0,0))
+						box_temp2.blit(self.coin1, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit_alt = box_temp2
+						
+						
 				else:
 					tile_to_blit = self.tile_surfaces[250]
 					tile_to_blit_alt = tile_to_blit
@@ -431,7 +458,7 @@ class World:
 		# Set tile occupancy to 8 to indicate there is a coin on that tile.
 		self.occupancy[row * self.bgnd_tiles_width + col] = 8
 		
-	def coin_unset(self, row, col)
+	def coin_unset(self, row, col):
 		# Set tile occupancy to 8 to indicate the tile is movable and blank
 		self.occupancy[row * self.bgnd_tiles_width + col] = 0
 
