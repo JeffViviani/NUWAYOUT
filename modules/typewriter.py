@@ -6,12 +6,23 @@ class Typewriter:
 	charbank = {}
 	letter_width = None
 	letter_height = None
+	number_width = None
 	
 	def __init__(self, world):
 		self.world = world
 	
 	@classmethod
 	def init_class(cls, world):
+		cls.charbank['0'] = world.scale(pygame.image.load("Images/Numbers/0inv.png"))
+		cls.charbank['1'] = world.scale(pygame.image.load("Images/Numbers/1inv.png"))
+		cls.charbank['2'] = world.scale(pygame.image.load("Images/Numbers/2inv.png"))
+		cls.charbank['3'] = world.scale(pygame.image.load("Images/Numbers/3inv.png"))
+		cls.charbank['4'] = world.scale(pygame.image.load("Images/Numbers/4inv.png"))
+		cls.charbank['5'] = world.scale(pygame.image.load("Images/Numbers/5inv.png"))
+		cls.charbank['6'] = world.scale(pygame.image.load("Images/Numbers/6inv.png"))
+		cls.charbank['7'] = world.scale(pygame.image.load("Images/Numbers/7inv.png"))
+		cls.charbank['8'] = world.scale(pygame.image.load("Images/Numbers/8inv.png"))
+		cls.charbank['9'] = world.scale(pygame.image.load("Images/Numbers/9inv.png"))
 		cls.charbank[' '] = world.scale(pygame.image.load("Images/font/space.png"))
 		cls.charbank[','] = world.scale(pygame.image.load("Images/font/comma.png"))
 		cls.charbank['.'] = world.scale(pygame.image.load("Images/font/period.png"))
@@ -43,6 +54,7 @@ class Typewriter:
 		cls.charbank['Y'] = world.scale(pygame.image.load("Images/font/Y.png"))
 		cls.charbank['Z'] = world.scale(pygame.image.load("Images/font/Z.png"))
 		cls.letter_width = int(floor(5 * world.scale_x))
+		cls.number_width = int(floor(18 * world.scale_x))
 		cls.letter_height = int(floor(9 * world.scale_y))
 		cls.letter_spacing = int(floor(world.scale_x))
 		
@@ -74,3 +86,8 @@ class Typewriter:
 			self.newline()
 		for c in word:
 			self.type(c)
+	#num should be passed as a string		
+	def type_number(self, num):
+		for c in num:
+			self.world.screen.blit(Typewriter.charbank[c],(self.cursor_x, self.cursor_y))
+			self.cursor_x += self.number_width

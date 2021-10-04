@@ -273,6 +273,7 @@ while True:
 				break
 			if keys[pygame.K_SPACE]:
 				menu_proceed_state = 1
+				world.points = 0
 
 			blink_counter = blink_counter + 1
 			if blink_state:
@@ -473,6 +474,8 @@ while True:
 		your_robot.ai = False
 		your_robot.health = 99
 		fire_cooldown = 0
+		points = 0
+		
 		
 		world.focus_camera(your_robot)
 		world.render_full(True)
@@ -541,6 +544,10 @@ while True:
 			health_bar_inner_rect.width = health_bar_inner_widths[your_robot.health]
 			pygame.draw.rect(screen, (0,0,0), health_bar_outer_rect)
 			pygame.draw.rect(screen, (72,212,51), health_bar_inner_rect)
+			
+			#Render the points
+			typewriter.set_cursor(0,0)
+			typewriter.type_number(str(world.points))
 			
 			if your_robot.diminish == 2:
 				#You lost!

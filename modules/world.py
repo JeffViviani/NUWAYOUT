@@ -26,8 +26,11 @@ class World:
 		self.last_tile_y_init = None
 		self.tile_surfaces = [None] * 999
 		self.load_tiles()
+		self.points = 0
 		self.tile_pixel_w = int(floor(20 * self.scale_x))
 		self.tile_pixel_h = int(floor(20 * self.scale_y))
+		self.tile_pixel_w_half = self.tile_pixel_w // 2
+		self.tile_pixel_h_half = self.tile_pixel_h // 2
 		self.camera_focus_offset_x = int(floor(0 - self.tile_pixel_w * 13.5))
 		self.camera_focus_offset_y = int(floor(0 - self.tile_pixel_h * 10.5))
 		self.frame = pygame.Rect(0, 0, self.tile_pixel_w, self.tile_pixel_h)
@@ -61,6 +64,28 @@ class World:
 	def focus_camera(self, robot):
 		self.camera_x = robot.x + self.camera_focus_offset_x
 		self.camera_y = robot.y + self.camera_focus_offset_y
+		
+	def rerender_tile(self, tile_x_abs, tile_y_abs, index):
+		tiles_away_topleft_x = tile_x_abs - self.last_tile_x_pos_init
+		tiles_away_topleft_y = tile_y_abs - self.last_tile_y_pos_init
+		print("TILES AWAY:" + str(tiles_away_topleft_x) + ' ' + str(tiles_away_topleft_y))
+		if tiles_away_topleft_x >= 0 and tiles_away_topleft_x < 30 and tiles_away_topleft_y >= 0 and tiles_away_topleft_y < 23:
+			print("HOOP")
+			frame = self.frame
+			frame.left = (tiles_away_topleft_x + 0) * self.tile_pixel_w
+			frame.top = (tiles_away_topleft_y + 0) * self.tile_pixel_h
+			print("LEFT: " + str(frame.left))
+			print("TOP: " + str(frame.top))
+			tile_index = self.bgnd_tiles[index]
+			print(tile_index)
+			tile = self.tile_surfaces[tile_index]
+			tile_alt = tile
+			if tile_index >= 500:
+				tile_alt = self.tile_surfaces[tile_index + 1]
+			print("RENDER!")
+			self.render_panel.blit(tile, frame)
+			self.render_panel_alt.blit(tile_alt, frame)
+			
 		
 	def render_partial(self):
 		tile_y_pos_init = int(floor(self.camera_y / self.tile_pixel_h))
@@ -115,6 +140,7 @@ class World:
 				cnt = cnt + 1
 				index = index + self.bgnd_tiles_width
 				frame.top = frame.top + self.tile_pixel_h
+				
 		elif tile_x_pos_init < self.last_tile_x_pos_init:
 			self.last_tile_x_pos_init = tile_x_pos_init
 			#Shift the render_pane one tile to the right
@@ -140,6 +166,16 @@ class World:
 						tile_to_blit_alt = tile_to_blit
 					else:
 						tile_to_blit_alt = self.tile_surfaces[tile_index + 1]
+						
+					if self.occupancy[index] == 8:
+						#Coin
+						self.box_temp.blit(tile_to_blit, (0,0))
+						self.box_temp.blit(self.coin0, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit = self.box_temp
+						
+						self.box_temp2.blit(tile_to_blit_alt, (0,0))
+						self.box_temp2.blit(self.coin1, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit_alt = self.box_temp2
 				else:
 					tile_to_blit = self.tile_surfaces[250]
 					tile_to_blit_alt = tile_to_blit
@@ -173,6 +209,16 @@ class World:
 						tile_to_blit_alt = tile_to_blit
 					else:
 						tile_to_blit_alt = self.tile_surfaces[tile_index + 1]
+						
+					if self.occupancy[index] == 8:
+						#Coin
+						self.box_temp.blit(tile_to_blit, (0,0))
+						self.box_temp.blit(self.coin0, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit = self.box_temp
+						
+						self.box_temp2.blit(tile_to_blit_alt, (0,0))
+						self.box_temp2.blit(self.coin1, (self.coin_offset_x, self.coin_offset_y))
+						tile_to_blit_alt = self.box_temp2
 				else:
 					tile_to_blit = self.tile_surfaces[250]
 					tile_to_blit_alt = tile_to_blit

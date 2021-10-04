@@ -95,6 +95,8 @@ class Robot:
 			elif self.diminish == 2:
 				self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
 				self.leave_page()
+				if self.type > 0:
+					self.world.points += 100
 				return
 		if self.flicker_counter > 0:
 			self.flicker_counter = self.flicker_counter - 1
@@ -345,15 +347,23 @@ class Robot:
 			self.point_right()
 			#If free to move
 			try:
-				if self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x + 1] < 9:
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
+				tmp = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
+				ocp = self.world.occupancy[tmp + 1]
+				if ocp < 9:
+					self.world.occupancy[tmp] = 0
 					self.tile_x = self.tile_x + 1
 					self.dest_x = self.x + self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
+					self.world.occupancy[tmp + 1] = self
+					if ocp == 8:
+						self.world.points += 5
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp + 1)
+						print("Kling!")
 					self.control_state = 1
 					self.movement_progress = 0
 					self.validate_page_col()
 			except IndexError:
+				return
+			except TypeError:
 				return
 				
 	#If capable, initiate downward movement
@@ -363,16 +373,23 @@ class Robot:
 			self.point_down()
 			#If free to move
 			try:
-				if self.world.occupancy[(self.tile_y + 1) * self.world.bgnd_tiles_width + self.tile_x] < 9:
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
+				tmp = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
+				ocp = self.world.occupancy[tmp + self.world.bgnd_tiles_width]
+				if ocp < 9:
+					self.world.occupancy[tmp] = 0
 					self.tile_y = self.tile_y + 1
 					self.dest_y = self.y + self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
+					self.world.occupancy[tmp + self.world.bgnd_tiles_width] = self
+					if ocp == 8:
+						self.world.points += 5
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp + self.world.bgnd_tiles_width) 
 					self.control_state = 2
 					self.movement_progress = 0
 					self.validate_page_row()
 					
 			except IndexError:
+				return
+			except TypeError:
 				return
 				
 	#If capable, initiate leftward movement
@@ -382,16 +399,23 @@ class Robot:
 			self.point_left()
 			#If free to move
 			try:
-				if self.tile_x >= 1 and self.world.occupancy[(self.tile_y * self.world.bgnd_tiles_width) + self.tile_x - 1] < 9:
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
+				tmp = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
+				ocp = self.world.occupancy[tmp - 1]
+				if self.tile_x >= 1 and ocp < 9:
+					self.world.occupancy[tmp] = 0
 					self.tile_x = self.tile_x - 1
 					self.dest_x = self.x - self.world.tile_pixel_w
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
+					self.world.occupancy[tmp - 1] = self
+					if ocp == 8:
+						self.world.points += 5
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - 1) 
 					self.control_state = 3
 					self.movement_progress = 0
 					self.validate_page_col()
 					
 			except IndexError:
+				return
+			except TypeError:
 				return
 				
 	#If capable, initiate upward movement
@@ -401,15 +425,22 @@ class Robot:
 			self.point_up()
 			#If free to move
 			try:
-				if self.tile_y >= 1 and self.world.occupancy[(self.tile_y - 1)*self.world.bgnd_tiles_width + self.tile_x] < 9:
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = 0
+				tmp = self.tile_y * self.world.bgnd_tiles_width + self.tile_x
+				ocp = self.world.occupancy[tmp - self.world.bgnd_tiles_width]
+				if self.tile_y >= 1 and ocp < 9:
+					self.world.occupancy[tmp] = 0
 					self.tile_y = self.tile_y - 1
 					self.dest_y = self.y - self.world.tile_pixel_h
-					self.world.occupancy[self.tile_y * self.world.bgnd_tiles_width + self.tile_x] = self
+					self.world.occupancy[tmp - self.world.bgnd_tiles_width] = self
+					if ocp == 8:
+						self.world.points += 5
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - self.world.bgnd_tiles_width) 
 					self.control_state = 4
 					self.movement_progress = 0
 					self.validate_page_row()
 			except IndexError:
+				return
+			except TypeError:
 				return
 	
 	#Checks if its page row is correct, and if not, changes it.
