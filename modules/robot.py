@@ -15,6 +15,12 @@ class Robot:
 		self.world = world
 		self.pagetable = pagetable
 		self.type = type
+		if type == 0:
+			self.enemy_type = 1
+		elif type == 1:
+			self.enemy_type = 0
+		else:
+			self.enemy_type = 0
 		self.base_costume = type * 5
 		self.costume = self.base_costume
 		self.target = None
@@ -156,7 +162,7 @@ class Robot:
 				if personality == 0:
 					#NO TARGET STATE
 					if self.target == None:
-						self.target = self.find_target(0, 0)
+						self.target = self.find_target(self.enemy_type, 0)
 						self.tick = 0
 					#HAS A TARGET STATE
 					else:
@@ -357,7 +363,7 @@ class Robot:
 					if ocp == 8:
 						self.world.points += 5
 						self.world.rerender_tile(self.tile_x, self.tile_y, tmp + 1)
-						print("Kling!")
+						pygame.mixer.Sound.play(World.coin_sound)
 					self.control_state = 1
 					self.movement_progress = 0
 					self.validate_page_col()
@@ -382,7 +388,8 @@ class Robot:
 					self.world.occupancy[tmp + self.world.bgnd_tiles_width] = self
 					if ocp == 8:
 						self.world.points += 5
-						self.world.rerender_tile(self.tile_x, self.tile_y, tmp + self.world.bgnd_tiles_width) 
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp + self.world.bgnd_tiles_width)
+						pygame.mixer.Sound.play(World.coin_sound)
 					self.control_state = 2
 					self.movement_progress = 0
 					self.validate_page_row()
@@ -408,7 +415,8 @@ class Robot:
 					self.world.occupancy[tmp - 1] = self
 					if ocp == 8:
 						self.world.points += 5
-						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - 1) 
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - 1)
+						pygame.mixer.Sound.play(World.coin_sound)
 					self.control_state = 3
 					self.movement_progress = 0
 					self.validate_page_col()
@@ -434,7 +442,8 @@ class Robot:
 					self.world.occupancy[tmp - self.world.bgnd_tiles_width] = self
 					if ocp == 8:
 						self.world.points += 5
-						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - self.world.bgnd_tiles_width) 
+						self.world.rerender_tile(self.tile_x, self.tile_y, tmp - self.world.bgnd_tiles_width)
+						pygame.mixer.Sound.play(World.coin_sound)
 					self.control_state = 4
 					self.movement_progress = 0
 					self.validate_page_row()

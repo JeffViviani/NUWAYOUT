@@ -133,6 +133,9 @@ else:
 world = World(screen)
 world.load_world("data/world0.txt")
 
+#Initialize the World class
+World.init_class()
+
 #Initialize Robot class
 Robot.init_class(world)
 
@@ -358,6 +361,10 @@ while True:
 				fps = 750
 			else:
 				fps = 14
+				
+			if keys[pygame.K_s]:
+				game_state = 4
+				break
 			
 			
 			if len(char_buffer) == 0 and eof == False:
