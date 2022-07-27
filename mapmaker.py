@@ -391,7 +391,7 @@ def set_player_robot(arr, screen_x, screen_y):
 	if lvl_two > 0 and lvl_two < map_width and lvl_one > 0 and lvl_one < map_height:
 		if map[lvl_one][lvl_two][1] == 0:
 			if player_data != None:
-				map[lvl_one][lvl_two][3] = None
+				player_data[3] = None
 			player_data = map[lvl_one][lvl_two]
 			player_data[3] = 1
 			
